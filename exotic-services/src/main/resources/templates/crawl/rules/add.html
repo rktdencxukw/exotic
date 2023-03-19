@@ -134,7 +134,7 @@
                         </div>
                         <div class="form-group cronExpression">
                             <label for="cronExpression" class="col-form-label"></label>
-                            <input type="text" readonly th:field="*{cronExpression}" class="form-control" id="cronExpression" placeholder="* * * * * * *">
+                            <input type="text" th:field="*{cronExpression}" class="form-control" id="cronExpression" placeholder="* * * * * * *">
                             <span th:if="${#fields.hasErrors('cronExpression')}" th:errors="*{cronExpression}" class="text-danger"></span>
                         </div>
                         <div class="form-group mt-3 cronExpression">
