@@ -31,6 +31,7 @@ class ExoticScheduler(
 
     @Bean
     fun runStartupTasks() {
+        logger.trace("kcdebug. runStartupTasks");
         if (!serverIsRunning()) {
             return
         }
@@ -40,6 +41,7 @@ class ExoticScheduler(
 
     @Scheduled(initialDelay = INITIAL_DELAY, fixedDelay = 10 * MILLIS_PER_SECOND)
     fun startCreatedCrawlRules() {
+        logger.trace("kcdebug. startCreatedCrawlRules");
         if (!serverIsRunning()) {
             return
         }
@@ -48,6 +50,7 @@ class ExoticScheduler(
 
     @Scheduled(initialDelay = INITIAL_DELAY, fixedDelay = 10 * MILLIS_PER_SECOND)
     fun restartCrawlRules() {
+        logger.trace("kcdebug. restartCrawlRules");
         if (!serverIsRunning()) {
             return
         }
@@ -56,6 +59,7 @@ class ExoticScheduler(
 
     @Scheduled(initialDelay = INITIAL_DELAY_2, fixedDelay = 10 * MILLIS_PER_SECOND)
     fun runPortalTasksWhenFew() {
+        logger.trace("kcdebug. runPortalTasksWhenFew");
         if (!serverIsRunning()) {
             return
         }
@@ -80,6 +84,7 @@ class ExoticScheduler(
 
     @Scheduled(initialDelay = INITIAL_DELAY_2, fixedDelay = 10 * MILLIS_PER_SECOND)
     fun runRetryingTasks() {
+        logger.trace("kcdebug. runRetryingTasks");
         if (!serverIsRunning()) {
             return
         }
@@ -101,6 +106,7 @@ class ExoticScheduler(
 
     @Scheduled(initialDelay = INITIAL_DELAY_3, fixedDelay = 30 * MILLIS_PER_SECOND)
     fun synchronizeProducts() {
+        logger.trace("kcdebug. synchronizeProducts");
         if (!serverIsRunning()) {
             return
         }
@@ -108,6 +114,7 @@ class ExoticScheduler(
     }
 
     private fun serverIsRunning(): Boolean {
+        logger.trace("kcdebug. serverIsRunning");
         val submitter = exoticCrawler.outPageScraper.taskSubmitter
 
         return try {
