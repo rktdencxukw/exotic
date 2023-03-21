@@ -13,6 +13,11 @@ enum class RuleStatus {
     Archived
 }
 
+enum class RuleType {
+    Portal,
+    Entity,
+}
+
 enum class TaskStatus(
     private val value: Int,
     private val series: Series,

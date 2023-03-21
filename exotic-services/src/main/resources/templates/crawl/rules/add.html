@@ -47,8 +47,8 @@
                                   class="text-danger"></span>
                         </div>
                         <div class="form-group">
-                            <label for="outLinkSelector" class="col-form-label">The CSS selector to extract out links from portal urls:<em class="required">*</em></label>
-                            <input type="text" th:field="*{outLinkSelector}" th:required="required"
+                            <label for="outLinkSelector" class="col-form-label">The CSS selector to extract out links from portal urls:</label>
+                            <input type="text" th:field="*{outLinkSelector}"
                                    class="form-control" id="outLinkSelector"
                                    placeholder="CSS selector for item links">
                             <span th:if="${#fields.hasErrors('outLinkSelector')}" th:errors="*{outLinkSelector}"
@@ -67,7 +67,7 @@
 
                 <div class="card my-3">
                     <div class="card-header">
-                        <label for="sqlTemplate" class="col-form-label">The SQL template to extract fields from <b class="text-info">item pages</b><em class="required">*</em></label>
+                        <label for="sqlTemplate" class="col-form-label">The SQL template to extract fields from portal url or <b class="text-info">item pages</b> (if outLinkSelector not empty) <em class="required">*</em></label>
                     </div>
                     <div class="card-body">
                         <div class="form-group">
@@ -161,6 +161,13 @@
 
                 <div class="card my-3">
                     <div class="card-body">
+                        <div class="form-group">
+                            <select th:field="*{type}" class="form-control">
+                                <option value="Portal" selected="selected">Portal</option>
+                                <option th:value="'EntityList'">EntityList</option>
+                                <option th:value="'EntityItem'">EntityItem</option>
+                            </select>
+                        </div>
                         <div class="form-group">
                             <label for="labels" class="col-form-label">Labels</label>
                             <input type="text" th:field="*{label}"

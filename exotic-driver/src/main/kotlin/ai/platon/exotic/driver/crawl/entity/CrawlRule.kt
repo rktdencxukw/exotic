@@ -3,6 +3,7 @@ package ai.platon.exotic.driver.crawl.entity
 import ai.platon.exotic.driver.common.ExoticUtils
 import ai.platon.exotic.driver.common.NameGenerator
 import ai.platon.exotic.driver.crawl.scraper.RuleStatus
+import ai.platon.exotic.driver.crawl.scraper.RuleType
 import ai.platon.pulsar.common.DateTimes
 import ai.platon.pulsar.common.urls.UrlUtils
 import com.cronutils.descriptor.CronDescriptor
@@ -86,6 +87,15 @@ class CrawlRule {
      * */
     @Column(name = "status", length = 8)
     var status: String = RuleStatus.Created.toString()
+
+    @Column(name = "type", length = 16)
+    var type: String? = RuleType.Portal.toString()
+
+    /**
+     * ids of last page in EntityListRule or last item in EntityItemRule
+     */
+    @Column(name = "ids_of_last")
+    var idsOfLast: Array<String>? = arrayOf()
 
     /**
      * The time difference, in minutes, between UTC time and local time.
