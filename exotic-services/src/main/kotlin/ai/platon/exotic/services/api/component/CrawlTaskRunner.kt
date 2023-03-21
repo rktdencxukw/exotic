@@ -22,6 +22,7 @@ import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Component
 import java.time.Instant
 import java.time.ZonedDateTime
+import java.util.concurrent.*
 
 @Component
 class CrawlTaskRunner(
@@ -33,6 +34,8 @@ class CrawlTaskRunner(
 
     private val retryingPortalTasks = ConcurrentNEntrantQueue<PortalTask>(5)
     private val retryingItemTasks = ConcurrentNEntrantQueue<ScrapeTask>(3)
+
+    private val processingRules = ConcurrentHashMap<Long, Boolean>();
 
     @Synchronized
     fun loadUnfinishedTasks() {
@@ -66,6 +69,9 @@ class CrawlTaskRunner(
     }
 
     fun shouldRun(rule: CrawlRule): Boolean {
+        if (processingRules.containsKey(rule.id)) {
+            return false
+        }
         return try {
             shouldRun0(rule)
         } catch (e: Exception) {
@@ -115,6 +121,7 @@ class CrawlTaskRunner(
             portalTaskRepository.saveAll(portalTasks)
 
             logger.debug("Created {} portal tasks", portalTasks.size)
+            processingRules.put(rule.id!!, true)
         } catch (t: Throwable) {
             logger.warn(t.stringify())
         }
@@ -183,6 +190,7 @@ class CrawlTaskRunner(
 
                 portalTask.status = TaskStatus.OK
                 portalTaskRepository.save(portalTask)
+                processingRules.remove(portalTask.rule!!.id)
             },
             onFailed = {
                 it.status = TaskStatus.FAILED
@@ -190,10 +198,12 @@ class CrawlTaskRunner(
                 portalTask.status = TaskStatus.FAILED
                 portalTaskRepository.save(portalTask)
 
+                processingRules.remove(portalTask.rule!!.id)
                 logger.info("Portal task is failed #{} | {}", portalTask.id, portalTask.url)
             },
             onFinished = {
 //                logger.info("Portal task is finished #{} | {}", portalTask.id, portalTask.url)
+                processingRules.remove(portalTask.rule!!.id)
             },
             onTimeout = {
                 logger.info("Portal task is timeout #{} | {}", portalTask.id, portalTask.url)
