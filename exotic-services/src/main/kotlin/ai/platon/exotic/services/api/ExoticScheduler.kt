@@ -31,7 +31,7 @@ class ExoticScheduler(
 
     @Bean
     fun runStartupTasks() {
-        logger.trace("kcdebug. runStartupTasks");
+        logger.warn("kcdebug. runStartupTasks");
         if (!serverIsRunning()) {
             return
         }
@@ -41,7 +41,7 @@ class ExoticScheduler(
 
     @Scheduled(initialDelay = INITIAL_DELAY, fixedDelay = 10 * MILLIS_PER_SECOND)
     fun startCreatedCrawlRules() {
-        logger.trace("kcdebug. startCreatedCrawlRules");
+        logger.warn("kcdebug. startCreatedCrawlRules");
         if (!serverIsRunning()) {
             return
         }
@@ -50,7 +50,7 @@ class ExoticScheduler(
 
     @Scheduled(initialDelay = INITIAL_DELAY, fixedDelay = 10 * MILLIS_PER_SECOND)
     fun restartCrawlRules() {
-        logger.trace("kcdebug. restartCrawlRules");
+        logger.warn("kcdebug. restartCrawlRules");
         if (!serverIsRunning()) {
             return
         }
@@ -59,7 +59,7 @@ class ExoticScheduler(
 
     @Scheduled(initialDelay = INITIAL_DELAY_2, fixedDelay = 10 * MILLIS_PER_SECOND)
     fun runPortalTasksWhenFew() {
-        logger.trace("kcdebug. runPortalTasksWhenFew");
+        logger.warn("kcdebug. runPortalTasksWhenFew");
         if (!serverIsRunning()) {
             return
         }
@@ -84,7 +84,7 @@ class ExoticScheduler(
 
     @Scheduled(initialDelay = INITIAL_DELAY_2, fixedDelay = 10 * MILLIS_PER_SECOND)
     fun runRetryingTasks() {
-        logger.trace("kcdebug. runRetryingTasks");
+        logger.warn("kcdebug. runRetryingTasks");
         if (!serverIsRunning()) {
             return
         }
@@ -106,7 +106,7 @@ class ExoticScheduler(
 
     @Scheduled(initialDelay = INITIAL_DELAY_3, fixedDelay = 30 * MILLIS_PER_SECOND)
     fun synchronizeProducts() {
-        logger.trace("kcdebug. synchronizeProducts");
+        logger.warn("kcdebug. synchronizeProducts");
         if (!serverIsRunning()) {
             return
         }
@@ -114,13 +114,15 @@ class ExoticScheduler(
     }
 
     private fun serverIsRunning(): Boolean {
-        logger.trace("kcdebug. serverIsRunning");
+        logger.warn("kcdebug. serverIsRunning");
         val submitter = exoticCrawler.outPageScraper.taskSubmitter
 
         return try {
             submitter.driver.count()
+            logger.warn("kcdebug. serverIsRunning, true");
             true
         } catch (e: Exception) {
+            logger.warn("kcdebug. serverIsRunning, false");
             false
         }
     }

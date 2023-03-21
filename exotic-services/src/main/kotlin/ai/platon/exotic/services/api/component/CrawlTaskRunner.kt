@@ -21,6 +21,7 @@ import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Component
 import java.time.Instant
+import java.time.ZonedDateTime
 
 @Component
 class CrawlTaskRunner(
@@ -54,6 +55,7 @@ class CrawlTaskRunner(
 
     @Synchronized
     fun restartCrawlRulesNextRound() {
+        logger.warn("kcdebug. restartCrawlRulesNextRound");
         val status = listOf(RuleStatus.Running, RuleStatus.Finished).map { it.toString() }
         val sort = Sort.by(Sort.Order.desc("id"))
         val page = PageRequest.of(0, 1000, sort)
@@ -259,8 +261,13 @@ class CrawlTaskRunner(
         val executionTime = ExecutionTime.forCron(quartzCron)
 
         val zonedLastCrawlTime = lastCrawlTime.atZone(DateTimes.zoneId)
-        val timeToNextExecution = executionTime.timeToNextExecution(zonedLastCrawlTime)
-        if (timeToNextExecution.isPresent && timeToNextExecution.get().seconds <= 0) {
+        val nextExecution = executionTime.nextExecution(zonedLastCrawlTime) 
+        // val timeToNextExecution = executionTime.timeToNextExecution(zonedLastCrawlTime) 
+        // val timeToNextExecution = executionTime.timeToNextExecution(ZonedDateTime.now())
+        // logger.warn("kcdebug. timeToNextExecution 0: {}, {}, {}, {}, {}, zonedLastCrawlTime:{}", timeToNextExecution.get().toSeconds(), rule.cronExpression, executionTime.toString(), DateTimes.zoneId, lastCrawlTime, zonedLastCrawlTime.toString())
+        // logger.warn("kcdebug. timeToNextExecution: {}", timeToNextExecution)
+        // if (timeToNextExecution.isPresent && timeToNextExecution.get().seconds <= 0) {
+        if (nextExecution.isPresent && nextExecution.get() <= ZonedDateTime.now()) {
             return true
         }
 
