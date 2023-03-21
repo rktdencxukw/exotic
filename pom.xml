@@ -180,6 +180,10 @@
 				<configuration>
 					<source>${javac.src.version}</source>
 					<target>${javac.target.version}</target>
+					<!-- <debug>true</debug> -->
+					<compilerArgs>
+            <arg>-g:source,lines</arg>
+          </compilerArgs>
 				</configuration>
 			</plugin>
 			<plugin>

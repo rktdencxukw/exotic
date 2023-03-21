@@ -62,6 +62,8 @@ open class TaskSubmitter(
 
     fun scrape(task: ListenableScrapeTask): ListenableScrapeTask {
         ++scrapeId
+        // print current stacktrace 
+        System.out.println("kcdebug. " + Thread.currentThread().stackTrace )
         logger.info("{}.\tScraping 1/{}/{} task | {} {}",
             scrapeId, pendingTasks.size, totalTaskCount, task.task.url, task.task.args)
         return submit(task)

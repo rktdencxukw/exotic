@@ -15,7 +15,7 @@
       "type": "kotlin",
       "request": "launch",
 			"name": "standlone",
-			"projectRoot": "${workspaceFolder}/exotic-standalone",
+			"projectRoot": "${workspaceFolder}",
 			// "mainClass": "ai.platon.exotic.standalone.starter.ExoticStandaloneStarterKt serve",
 			"mainClass": "ai.platon.exotic.standalone.starter.ExoticStandaloneStarterKt",
       // set options to main function
@@ -25,7 +25,7 @@
       "type": "kotlin",
       "request": "attach",
       "name": "kotlin attach",
-			"projectRoot": "${workspaceFolder}/exotic-standalone",
+			"projectRoot": "${workspaceFolder}",
       "hostName": "127.0.0.1",
       "port": 8000,
       "timeout": 2000
