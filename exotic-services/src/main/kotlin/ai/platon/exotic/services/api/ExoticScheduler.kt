@@ -14,6 +14,8 @@ import org.springframework.scheduling.annotation.EnableScheduling
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 
+
+//spring.task.scheduling.enabled=false in application.properties
 @Component
 @EnableScheduling
 class ExoticScheduler(
@@ -28,10 +30,11 @@ class ExoticScheduler(
     }
 
     private val logger = LoggerFactory.getLogger(ExoticScheduler::class.java)
+    private val traceLogger = LoggerFactory.getLogger("com.kc.trace")
 
     @Bean
     fun runStartupTasks() {
-        logger.warn("kcdebug. runStartupTasks");
+        traceLogger.info("runStartupTasks");
         if (!serverIsRunning()) {
             return
         }
@@ -41,7 +44,7 @@ class ExoticScheduler(
 
     @Scheduled(initialDelay = INITIAL_DELAY, fixedDelay = 10 * MILLIS_PER_SECOND)
     fun startCreatedCrawlRules() {
-        logger.warn("kcdebug. startCreatedCrawlRules");
+        traceLogger.info("startCreatedCrawlRules");
         if (!serverIsRunning()) {
             return
         }
@@ -50,7 +53,7 @@ class ExoticScheduler(
 
     @Scheduled(initialDelay = INITIAL_DELAY, fixedDelay = 10 * MILLIS_PER_SECOND)
     fun restartCrawlRules() {
-        logger.warn("kcdebug. restartCrawlRules");
+        traceLogger.info("restartCrawlRules");
         if (!serverIsRunning()) {
             return
         }
@@ -59,7 +62,7 @@ class ExoticScheduler(
 
     @Scheduled(initialDelay = INITIAL_DELAY_2, fixedDelay = 10 * MILLIS_PER_SECOND)
     fun runPortalTasksWhenFew() {
-        logger.warn("kcdebug. runPortalTasksWhenFew");
+        traceLogger.info("runPortalTasksWhenFew");
         if (!serverIsRunning()) {
             return
         }
@@ -84,7 +87,7 @@ class ExoticScheduler(
 
     @Scheduled(initialDelay = INITIAL_DELAY_2, fixedDelay = 10 * MILLIS_PER_SECOND)
     fun runRetryingTasks() {
-        logger.warn("kcdebug. runRetryingTasks");
+        traceLogger.info("runRetryingTasks");
         if (!serverIsRunning()) {
             return
         }
@@ -106,7 +109,7 @@ class ExoticScheduler(
 
     @Scheduled(initialDelay = INITIAL_DELAY_3, fixedDelay = 30 * MILLIS_PER_SECOND)
     fun synchronizeProducts() {
-        logger.warn("kcdebug. synchronizeProducts");
+        traceLogger.info("synchronizeProducts");
         if (!serverIsRunning()) {
             return
         }
@@ -114,15 +117,15 @@ class ExoticScheduler(
     }
 
     private fun serverIsRunning(): Boolean {
-        logger.warn("kcdebug. serverIsRunning");
+        traceLogger.info("serverIsRunning");
         val submitter = exoticCrawler.outPageScraper.taskSubmitter
 
         return try {
             submitter.driver.count()
-            logger.warn("kcdebug. serverIsRunning, true");
+            traceLogger.info("serverIsRunning, true");
             true
         } catch (e: Exception) {
-            logger.warn("kcdebug. serverIsRunning, false");
+            traceLogger.info("serverIsRunning, false");
             false
         }
     }

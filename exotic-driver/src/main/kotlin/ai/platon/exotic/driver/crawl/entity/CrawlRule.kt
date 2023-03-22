@@ -94,8 +94,9 @@ class CrawlRule {
     /**
      * ids of last page in EntityListRule or last item in EntityItemRule
      */
-    @Column(name = "ids_of_last")
-    var idsOfLast: Array<String>? = arrayOf()
+    @Column(name = "ids_of_last", length = 1024)
+    var idsOfLast: String = ""
+
 
     /**
      * The time difference, in minutes, between UTC time and local time.

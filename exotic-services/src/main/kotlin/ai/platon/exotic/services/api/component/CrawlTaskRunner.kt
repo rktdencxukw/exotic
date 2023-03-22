@@ -31,6 +31,7 @@ class CrawlTaskRunner(
     val scraper: ExoticCrawler
 ) {
     private val logger = LoggerFactory.getLogger(CrawlTaskRunner::class.java)
+    private val traceLogger = LoggerFactory.getLogger("com.kc.trace")
 
     private val retryingPortalTasks = ConcurrentNEntrantQueue<PortalTask>(5)
     private val retryingItemTasks = ConcurrentNEntrantQueue<ScrapeTask>(3)
@@ -58,7 +59,7 @@ class CrawlTaskRunner(
 
     @Synchronized
     fun restartCrawlRulesNextRound() {
-        logger.warn("kcdebug. restartCrawlRulesNextRound");
+        traceLogger.info("restartCrawlRulesNextRound");
         val status = listOf(RuleStatus.Running, RuleStatus.Finished).map { it.toString() }
         val sort = Sort.by(Sort.Order.desc("id"))
         val page = PageRequest.of(0, 1000, sort)
@@ -191,6 +192,23 @@ class CrawlTaskRunner(
                 portalTask.status = TaskStatus.OK
                 portalTaskRepository.save(portalTask)
                 processingRules.remove(portalTask.rule!!.id)
+
+                val resultSet = it.response.resultSet
+                if (resultSet == null || resultSet.isEmpty()) {
+                    logger.warn("No result set | {}", it.configuredUrl)
+                } else {
+                    var ids = resultSet[0]["ids"]?.toString()
+                    if (ids.isNullOrBlank()) {
+                        logger.warn("No ids in task #{} | {}", portalTask.id, it.configuredUrl)
+                    } else {
+                        ids = ids.removePrefix("(").removeSuffix(")")
+                        // TODO: normalization
+                        val rule = portalTask.rule
+                        rule!!.idsOfLast = ids
+                        crawlRuleRepository.save(rule)
+                        crawlRuleRepository.flush()
+                    }
+                }
             },
             onFailed = {
                 it.status = TaskStatus.FAILED

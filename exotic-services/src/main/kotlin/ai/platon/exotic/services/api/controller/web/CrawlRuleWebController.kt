@@ -85,6 +85,9 @@ class CrawlRuleWebController(
 
         rule.createdDate = Instant.now()
         rule.status = RuleStatus.Created.toString()
+        if (!rule.period.isNegative) { // 没用 cron
+            rule.cronExpression = ""
+        }
 
         repository.save(rule)
         return "redirect:/crawl/rules/"
@@ -112,6 +115,12 @@ class CrawlRuleWebController(
         rule.createdDate = old.createdDate
         rule.lastCrawlTime = old.lastCrawlTime
         rule.crawlHistory = old.crawlHistory
+        rule.idsOfLast = old.idsOfLast
+        rule.type = old.type
+        
+        if (!rule.period.isNegative) { // 没用 cron
+            rule.cronExpression = ""
+        }
 
         repository.save(rule)
 

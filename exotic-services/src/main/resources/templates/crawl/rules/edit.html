@@ -125,7 +125,7 @@
                                 <option value="PT240000H" selected="selected">Once</option>
                                 <option th:value="'PT-1H'">Use Cron</option>
                                 <option th:value="'PT10M'">Every 10 minutes</option>
-                                <option th:value="'PT10M'">Every 30 minutes</option>
+                                <option th:value="'PT30M'">Every 30 minutes</option>
                                 <option th:value="'PT1H'">Every hour</option>
                                 <option th:value="'PT12H'">Every 12 hour</option>
                                 <option th:value="'PT24H'">Every day</option>
@@ -166,8 +166,7 @@
                         <div class="form-group">
                             <select th:field="*{type}" class="form-control">
                                 <option value="Portal" selected="selected">Portal</option>
-                                <option th:value="'EntityList'">EntityList</option>
-                                <option th:value="'EntityItem'">EntityItem</option>
+                                <option th:value="'Entity'">Entity</option>
                             </select>
                         </div>
                         <div class="form-group">

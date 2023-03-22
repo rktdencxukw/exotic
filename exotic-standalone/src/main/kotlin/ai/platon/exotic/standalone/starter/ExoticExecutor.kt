@@ -219,7 +219,8 @@ class ExoticExecutor(val argv: Array<String>) {
 
     internal fun runServer() {
         SpringApplicationBuilder(StandaloneApplication::class.java)
-            .profiles("h2")
+//            .profiles("h2")
+            .profiles("mysql")
             .initializers(ScentContextInitializer())
             .registerShutdownHook(true)
             .run(*argv)

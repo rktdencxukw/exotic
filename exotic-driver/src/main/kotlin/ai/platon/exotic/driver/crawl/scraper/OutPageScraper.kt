@@ -5,23 +5,41 @@ import ai.platon.exotic.driver.common.IS_DEVELOPMENT
 import ai.platon.exotic.driver.common.PRODUCT_MAX_OUT_PAGES
 import ai.platon.exotic.driver.crawl.entity.CrawlRule
 import ai.platon.exotic.driver.crawl.entity.PortalTask
+import ai.platon.pulsar.common.DateTimes
 import ai.platon.pulsar.common.urls.UrlUtils
 import ai.platon.pulsar.driver.DriverSettings
+import com.google.gson.Gson
+import com.google.gson.GsonBuilder
+import com.google.gson.annotations.SerializedName
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.time.Duration
-import kotlin.collections.indexOf
 import java.net.URI
 import java.net.http.HttpClient
 import java.net.http.HttpRequest
 import java.net.http.HttpRequest.BodyPublishers
 import java.net.http.HttpResponse.BodyHandlers
-import kotlin.system.exitProcess
 
+class Markdown(val content: String) {
+}
+
+class WeChatMarkdownMsg(val title: String, val content: String){
+    @SerializedName("msgtype")
+    val msgType = "markdown"
+    lateinit var markdown: Markdown
+    init {
+       val content = """
+           ${DateTimes.now()}\n
+           title: ${title}\n\n
+           content: $content
+       """
+        markdown = Markdown(content)
+    }
+}
 
 open class OutPageScraper(
     val driverSettings: DriverSettings
-): AutoCloseable {
+) : AutoCloseable {
     var logger: Logger = LoggerFactory.getLogger(OutPageScraper::class.java)
 
     val httpTimeout: Duration = Duration.ofMinutes(3)
@@ -59,6 +77,7 @@ open class OutPageScraper(
     fun scrape(task: ListenableScrapeTask) {
         taskSubmitter.scrape(task)
     }
+
     fun scrapeEntity(listenablePortalTask: ListenablePortalTask) {
         val task = listenablePortalTask.task
         val rule = task.rule
@@ -79,47 +98,44 @@ open class OutPageScraper(
             it.onSubmitted = { listenablePortalTask.onSubmitted(it.task) }
             it.onRetry = { listenablePortalTask.onRetry(it.task) }
             it.onSuccess = {
-                listenablePortalTask.onSuccess(it.task)
 
                 val resultSet = it.task.response.resultSet
                 if (resultSet == null || resultSet.isEmpty()) {
                     logger.warn("No result set | {}", it.task.configuredUrl)
-                }else{
-                var ids = resultSet[0]["ids"]?.toString()
-                if (ids.isNullOrBlank()) {
-                    logger.warn("No ids in task #{} | {}", task.id, it.task.configuredUrl)
                 } else {
-                    ids = ids.removePrefix("(").removeSuffix(")")
-                    // TODO: normalization
-                    val idsArr = ids.split(",").asSequence().map{ it.trim() }.toList().toTypedArray()
+                    var ids = resultSet[0]["ids"]?.toString()
+                    if (ids.isNullOrBlank()) {
+                        logger.warn("No ids in task #{} | {}", task.id, it.task.configuredUrl)
+                    } else {
+                        ids = ids.removePrefix("(").removeSuffix(")")
+                        // TODO: normalization
+                        val idsArr = ids.split(",").asSequence().map { it.trim() }.toList().toTypedArray()
 
-                    var titles = resultSet[0]["titles"]?.toString()
-                    val titlesArr = titles!!.split(",").asSequence().map{ it.trim() }.toList().toTypedArray()
-                    var contents = resultSet[0]["contents"]?.toString()
-                    val contentsArr = contents!!.split(",").asSequence().map{ it.trim() }.toList().toTypedArray()
-                    val oldSet: Set<String> = setOf(rule.idsOfLast?:{})
-                    for(i in idsArr.indices) {
-                        if (rule.idsOfLast.isNullOrEmpty() || !oldSet.contains(idsArr[i])){
-                            
-                            var body = JSONObject()
-                            body.put("msgtype", "markdown")
-                            var markdown = JSONObject()
-                            markdown.put("content", titlesArr[i] + "\n" + contentsArr[i])
-                            body.put("markdown", markdown)
-    val request = HttpRequest.newBuilder()
-    .uri(URI.create("https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=5932e314-7ffe-47bd-a097-87e9a39af354"))
-    .header("Content-Type", "application/json")
-    .POST(BodyPublishers.ofString(body)).build()
-    hc.send(request, BodyHandlers.ofString())
-// val response = hc.send(request, BodyHandlers.ofString()).body()
+                        var titles = resultSet[0]["titles"]?.toString()
+                        val titlesArr = titles!!.split(",").asSequence().map { it.trim() }.toList().toTypedArray()
+                        var contents = resultSet[0]["contents"]?.toString()
+                        val contentsArr = contents!!.split(",").asSequence().map { it.trim() }.toList().toTypedArray()
+                        val oldSet: List<String> = rule.idsOfLast.split(",").map{it.trim()}
+                        for (i in idsArr.indices) {
+                            if (rule.idsOfLast.isNullOrEmpty() || !oldSet.contains(idsArr[i])) {
 
+                                var msg = WeChatMarkdownMsg(titlesArr[i], contentsArr[i])
+                                var gson = Gson()
+                                val request = HttpRequest.newBuilder()
+                                    .uri(URI.create("https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=5932e314-7ffe-47bd-a097-87e9a39af354"))
+                                    .header("Content-Type", "application/json")
+                                    .POST(BodyPublishers.ofString(gson.toJson(msg))).build()
+                                hc.send(request, BodyHandlers.ofString())
+                                // val response = hc.send(request, BodyHandlers.ofString()).body()
+
+                            }
                         }
-                    }
 
-                    var new_ids = setOf(idsArr) - oldSet
-                    rule.idsOfLast = idsArr
+                    }
                 }
-            }
+
+                // 会更改rules ids_of_last， 放到最后
+                listenablePortalTask.onSuccess(it.task)
             }
             it.onFailed = { listenablePortalTask.onFailed(it.task) }
             it.onFinished = { listenablePortalTask.onFinished(it.task) }
@@ -221,8 +237,10 @@ open class OutPageScraper(
             .toList()
 
         if (urls.isEmpty()) {
-            logger.info("No out links in task #{} | <{}> | {}",
-                portalTask.id, outLinkSelector, scrapeTask.task.configuredUrl)
+            logger.info(
+                "No out links in task #{} | <{}> | {}",
+                portalTask.id, outLinkSelector, scrapeTask.task.configuredUrl
+            )
         }
 
         return urls

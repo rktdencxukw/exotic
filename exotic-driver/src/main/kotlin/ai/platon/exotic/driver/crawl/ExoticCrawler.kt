@@ -2,10 +2,7 @@ package ai.platon.exotic.driver.crawl
 
 import ai.platon.exotic.driver.common.IS_DEVELOPMENT
 import ai.platon.exotic.driver.crawl.entity.ItemDetail
-import ai.platon.exotic.driver.crawl.scraper.ListenablePortalTask
-import ai.platon.exotic.driver.crawl.scraper.ListenableScrapeTask
-import ai.platon.exotic.driver.crawl.scraper.OutPageScraper
-import ai.platon.exotic.driver.crawl.scraper.ScrapeTask
+import ai.platon.exotic.driver.crawl.scraper.*
 import ai.platon.pulsar.common.config.Params
 import ai.platon.pulsar.driver.DriverSettings
 import org.slf4j.LoggerFactory
@@ -91,7 +88,11 @@ class ExoticCrawler(val env: Environment? = null): AutoCloseable {
 //            task.onItemSuccess = {
 //                createPendingItems(it)
 //            }
-            outPageScraper.scrape(task)
+            if (task.task.rule!!.type == RuleType.Entity.toString()) {
+                outPageScraper.scrapeEntity(task)
+            } else {
+                outPageScraper.scrape(task)
+            }
         } catch (t: Throwable) {
             logger.warn("Unexpected exception", t)
         }
