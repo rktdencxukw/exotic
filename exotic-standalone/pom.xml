@@ -74,9 +74,18 @@
 					<executable>true</executable>
 <!--					<layout>ZIP</layout>-->
 <!--					<includes>-->
+<!--&lt;!&ndash;						<include>&ndash;&gt;-->
+
+<!--&lt;!&ndash;							<groupId>nothing</groupId>&ndash;&gt;-->
+<!--&lt;!&ndash;							<artifactId>nothing</artifactId>&ndash;&gt;-->
+<!--&lt;!&ndash;						</include>&ndash;&gt;-->
 <!--						<include>-->
-<!--							<groupId>non-exists</groupId>-->
-<!--							<artifactId>non-exists</artifactId>-->
+<!--							<groupId>ai.platon.pulsar</groupId>-->
+<!--							<artifactId>pulsar-beans</artifactId>-->
+<!--						</include>-->
+<!--						<include>-->
+<!--							<groupId>ai.platon.scent</groupId>-->
+<!--							<artifactId>scent-beans</artifactId>-->
 <!--						</include>-->
 <!--					</includes>-->
 					<!-- 放在 includes nothing 之后-->
@@ -106,6 +115,32 @@
 <!--							<outputDirectory>${project.build.output}/lib</outputDirectory>-->
 <!--							<includeScope>compile</includeScope>-->
 <!--							<includeScope>runtime</includeScope>-->
+<!--						</configuration>-->
+<!--					</execution>-->
+<!--				</executions>-->
+<!--			</plugin>-->
+<!--			&lt;!&ndash; 用于复制指定的文件 &ndash;&gt;-->
+<!--			<plugin>-->
+<!--				<artifactId>maven-resources-plugin</artifactId>-->
+<!--				<executions>-->
+<!--					&lt;!&ndash; 复制配置文件 &ndash;&gt;-->
+<!--					<execution>-->
+<!--						<id>copy-resources</id>-->
+<!--						<phase>package</phase>-->
+<!--						<goals>-->
+<!--							<goal>copy-resources</goal>-->
+<!--						</goals>-->
+<!--						<configuration>-->
+<!--							<resources>-->
+<!--								<resource>-->
+<!--									<directory>src/main/resources</directory>-->
+<!--									<includes>-->
+<!--										<include>application*.properties</include>-->
+<!--										<include>logback*.xml</include>-->
+<!--									</includes>-->
+<!--								</resource>-->
+<!--							</resources>-->
+<!--							<outputDirectory>${project.build.directory}/resources</outputDirectory>-->
 <!--						</configuration>-->
 <!--					</execution>-->
 <!--				</executions>-->
