@@ -13,6 +13,7 @@
 	<artifactId>exotic</artifactId>
 	<version>1.11.4-SNAPSHOT</version>
 
+
 	<packaging>pom</packaging>
 
 	<name>Exotic</name>
@@ -303,6 +304,7 @@
 	</dependencies>
 
 	<properties>
+		<kotlin.compiler.incremental>true</kotlin.compiler.incremental>
 		<javac.src.version>11</javac.src.version>
 		<javac.target.version>11</javac.target.version>
 		<kotlin.version>1.5.32</kotlin.version>

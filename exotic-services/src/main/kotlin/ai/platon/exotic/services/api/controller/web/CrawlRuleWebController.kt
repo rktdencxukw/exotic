@@ -38,6 +38,7 @@ class CrawlRuleWebController(
         val pageable = PageRequest.of(pageNumber, pageSize, sort, sortProperty)
         val rules = repository.findAllByStatusNot(RuleStatus.Archived.toString(), pageable)
         model.addAttribute("rules", rules)
+        println("kcdebug. ")
         return "crawl/rules/index"
     }
 
@@ -117,7 +118,7 @@ class CrawlRuleWebController(
         rule.crawlHistory = old.crawlHistory
         rule.idsOfLast = old.idsOfLast
         rule.type = old.type
-        
+
         if (!rule.period.isNegative) { // 没用 cron
             rule.cronExpression = ""
         }

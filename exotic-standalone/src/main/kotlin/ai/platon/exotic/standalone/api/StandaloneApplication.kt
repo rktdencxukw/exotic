@@ -35,7 +35,9 @@ import org.springframework.scheduling.annotation.EnableScheduling
 //@Import(ExoticApplication::class, ExoticServerApplication::class)
 @EnableScheduling
 @EnableJpaAuditing
-class StandaloneApplication
+class StandaloneApplication {
+
+}
 
 fun main(argv: Array<String>) {
     ExoticUtils.prepareDatabaseOrFail()

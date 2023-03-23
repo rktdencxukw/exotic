@@ -36,8 +36,10 @@
                                 <th th:title="Failed">Fai</th>
                                 <th th:title="Finished">Fin</th>
 
+                                <th>Created Time</th>
                                 <th>Start At</th>
                                 <th>Last Modified At</th>
+                                <th>Status</th>
                                 <th>Url</th>
                                 <th>Rule</th>
 
@@ -53,8 +55,10 @@
                                 <td th:text="${task.successCount}"></td>
                                 <td th:text="${task.failedCount}"></td>
                                 <td th:text="${task.finishedCount}"></td>
-                                <td th:text="${#temporals.format(task.startTime, 'yy-MM-dd h:mm a')}"></td>
-                                <td th:text="${#temporals.format(task.lastModifiedDate, 'yy-MM-dd h:mm a')}"></td>
+                                <td th:text="${#temporals.format(task.createdDate, 'yyyy-MM-dd HH:mm:ss.SSS')}"></td>
+                                <td th:text="${#temporals.format(task.startTime, 'yyyy-MM-dd HH:mm:ss.SSS')}"></td>
+                                <td th:text="${#temporals.format(task.lastModifiedDate, 'yyyy-MM-dd HH:mm:ss.SSS')}"></td>
+                                <td th:text="${rule.status}"></td>
                                 <td>
                                     <a th:href="${task.url}" th:text="${task.abbreviatedUrl}" target="_blank"></a>
                                 </td>

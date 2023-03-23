@@ -133,7 +133,10 @@
                                 <th>Failed</th>
                                 <th>Finished</th>
 
+                                <th>Created Time</th>
                                 <th>Start Time</th>
+                                <th>Last Modified Time</th>
+                                <th>Status</th>
 
                                 <th>Actions</th>
                             </tr>
@@ -147,7 +150,10 @@
                                 <td th:text="${task.retryCount}"></td>
                                 <td th:text="${task.failedCount}"></td>
                                 <td th:text="${task.finishedCount}"></td>
-                                <td th:text="${#temporals.format(task.startTime, 'yyyy-MM-dd h:mm:ss a')}"></td>
+                                <td th:text="${#temporals.format(task.createdDate, 'yyyy-MM-dd HH:mm:ss.SSS')}"></td>
+                                <td th:text="${#temporals.format(task.startTime, 'yyyy-MM-dd HH:mm:ss.SSS')}"></td>
+                                <td th:text="${#temporals.format(task.lastModifiedDate, 'yyyy-MM-dd HH:mm:ss.SSS')}"></td>
+                                <td th:text="${rule.status}"></td>
 
                                 <td><a th:href="@{/crawl/portal-tasks/view/{id}(id=${task.id})}"
                                        title="Client side view" class="btn btn-info"><i class="fas fa-eye ml-1"></i></a>

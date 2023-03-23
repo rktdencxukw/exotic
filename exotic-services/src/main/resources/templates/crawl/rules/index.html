@@ -60,7 +60,7 @@
                                 <td th:text="${#arrays.length(rule.portalUrls.split('\n'))}"></td>
                                 <td th:text="${rule.status}"></td>
                                 <td th:text="${#temporals.format(rule.startTime, 'yy-MM-dd')}"></td>
-                                <td th:text="${#temporals.format(rule.lastCrawlTime, 'yy-MM-dd h:mm a')}"></td>
+                                <td th:text="${#temporals.format(rule.lastCrawlTime, 'yy-MM-dd HH:mm:ss.SSS')}"></td>
                                 <td>
                                     <a th:href="@{/crawl/rules/view/{id}(id=${rule.id})}"
                                        title="View" class="btn btn-info" rel="noindex nofollow noopener">
