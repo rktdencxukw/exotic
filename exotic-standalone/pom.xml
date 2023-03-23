@@ -9,6 +9,11 @@
 		<version>1.11.4-SNAPSHOT</version>
 	</parent>
 
+	<properties>
+		<project.build.output>/Users/kc/DC/event-drived-trade/crawl/exotic/exotic-standalone/target/</project.build.output>
+	</properties>
+
+
 	<artifactId>exotic-standalone</artifactId>
 	<packaging>jar</packaging>
 	<name>Exotic Standalone</name>
@@ -66,10 +71,45 @@
 				<artifactId>spring-boot-maven-plugin</artifactId>
 				<configuration>
 					<mainClass>ai.platon.exotic.standalone.starter.ExoticStandaloneStarterKt</mainClass>
-					<addResources>true</addResources>
 					<executable>true</executable>
+<!--					<layout>ZIP</layout>-->
+<!--					<includes>-->
+<!--						<include>-->
+<!--							<groupId>non-exists</groupId>-->
+<!--							<artifactId>non-exists</artifactId>-->
+<!--						</include>-->
+<!--					</includes>-->
+					<!-- 放在 includes nothing 之后-->
+					<addResources>true</addResources>
 				</configuration>
+<!--				<executions>-->
+<!--					<execution>-->
+<!--						<goals>-->
+<!--							<goal>repackage</goal>-->
+<!--						</goals>-->
+<!--					</execution>-->
+<!--				</executions>-->
 			</plugin>
+			<!-- 依赖处理插件 -->
+<!--			<plugin>-->
+<!--				<groupId>org.apache.maven.plugins</groupId>-->
+<!--				<artifactId>maven-dependency-plugin</artifactId>-->
+<!--				<version>2.8</version>-->
+<!--				<executions>-->
+<!--					<execution>-->
+<!--						<id>copy</id>-->
+<!--						<phase>package</phase>-->
+<!--						<goals>-->
+<!--							<goal>copy-dependencies</goal>-->
+<!--						</goals>-->
+<!--						<configuration>-->
+<!--							<outputDirectory>${project.build.output}/lib</outputDirectory>-->
+<!--							<includeScope>compile</includeScope>-->
+<!--							<includeScope>runtime</includeScope>-->
+<!--						</configuration>-->
+<!--					</execution>-->
+<!--				</executions>-->
+<!--			</plugin>-->
 		</plugins>
 	</build>
 </project>
