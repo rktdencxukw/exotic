@@ -1,9 +1,11 @@
 package ai.platon.exotic.services.api.controller.web
 
+import ai.platon.exotic.driver.crawl.ExoticCrawler
 import ai.platon.exotic.driver.crawl.entity.CrawlRule
-import ai.platon.exotic.driver.crawl.scraper.RuleStatus
-import ai.platon.exotic.driver.crawl.scraper.RuleType
+import ai.platon.exotic.driver.crawl.entity.PortalTask
+import ai.platon.exotic.driver.crawl.scraper.*
 import ai.platon.exotic.services.api.component.CrawlTaskRunner
+import ai.platon.exotic.services.api.controller.response.ResponseBody
 import ai.platon.exotic.services.api.persist.CrawlRuleRepository
 import ai.platon.exotic.services.common.jackson.prettyScentObjectWritter
 import ai.platon.pulsar.common.LinkExtractors
@@ -11,28 +13,31 @@ import ai.platon.pulsar.common.ResourceLoader
 import ai.platon.pulsar.common.getLogger
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
+import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.validation.BindingResult
+import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.*
 import java.time.Instant
+import java.util.stream.Collectors
 import javax.validation.Valid
-import kotlin.random.Random
 
 @Controller
 @RequestMapping("crawl/rules")
 class CrawlRuleWebController(
     private val repository: CrawlRuleRepository,
     private val crawlTaskRunner: CrawlTaskRunner,
+    private val exoticCrawler: ExoticCrawler,
 ) {
     private val amazonSeeds = LinkExtractors.fromResource("sites/amazon/best-sellers.txt")
     private val amazonItemSQLTemplate = ResourceLoader.readString("sites/amazon/sqls/x-item.sql").trim()
     private val sqlTemplate = """
-        select
-          dom_all_attrs(dom, 'a.news-flash-item-title', 'href') as ids,
-          dom_all_texts(dom, '.news-flash-item-title') as titles,
-          dom_all_texts(dom, '.news-flash-item-content') as contents
-        from load_and_select('{{url}}', 'body');
+select
+  dom_all_attrs(dom, 'a.news-flash-item-title', 'href') as ids,
+  dom_all_texts(dom, '.news-flash-item-title') as titles,
+  dom_all_texts(dom, '.news-flash-item-content') as contents
+from load_and_select('{{url}}', 'body');
     """
 
     @GetMapping("/")
@@ -77,7 +82,7 @@ class CrawlRuleWebController(
 
     @GetMapping("/add")
     fun create(model: Model): String {
-    //        getLogger(this).info(prettyScentObjectWritter().writeValueAsString(rule))
+        //        getLogger(this).info(prettyScentObjectWritter().writeValueAsString(rule))
         val rule = CrawlRule()
         rule.id = 0L
         rule.type = RuleType.Entity.toString()
@@ -114,6 +119,52 @@ class CrawlRuleWebController(
 
         repository.save(rule)
         return "redirect:/crawl/rules/"
+    }
+
+    @PostMapping("/test_run")
+    fun testRun(
+        @Valid @RequestBody rule: CrawlRule,
+        errors: Errors
+    ): ResponseEntity<ResponseBody<Any>> {
+        getLogger(this).info(prettyScentObjectWritter().writeValueAsString(rule))
+
+        //If error, just return a 400 bad request, along with the error message
+        if (errors.hasErrors()) {
+            val msg = errors.allErrors
+                .stream().map { x -> x.defaultMessage }
+                .collect(Collectors.joining(","))
+            return ResponseEntity.badRequest().body(ResponseBody.error(msg))
+        }
+        // TODO not retry
+        var portalTask = PortalTask(rule.portalUrls, "", 3)
+        var scrapeTask = ScrapeTask(rule.portalUrls, "", 3, rule.sqlTemplate!!)
+        scrapeTask.companionPortalTask = portalTask
+
+        val listenableScrapeTask = ListenableScrapeTask(scrapeTask).also {
+            it.onSubmitted = {
+                it.task.status = TaskStatus.SUBMITTED }
+            it.onRetry = {
+                it.task.status = TaskStatus.RETRYING }
+            it.onSuccess = {
+                it.task.status = TaskStatus.OK
+            }
+            it.onFailed = {
+                it.task.status = TaskStatus.FAILED }
+            it.onFinished = {
+                it.task.status = TaskStatus.OK }
+            it.onTimeout = {
+                it.task.status = TaskStatus.FAILED }
+        }
+
+        val taskSubmitter = TaskSubmitter(exoticCrawler.driverSettings)
+        taskSubmitter.scrape(listenableScrapeTask)
+
+        while (scrapeTask.status != TaskStatus.OK || scrapeTask.status != TaskStatus.FAILED) {
+            // sleep 1s
+            Thread.sleep(1000)
+        }
+
+        return ResponseEntity.ok(ResponseBody.ok(scrapeTask))
     }
 
     @GetMapping("/edit/{id}")
