@@ -2,6 +2,7 @@ package ai.platon.exotic.services.api.controller.web
 
 import ai.platon.exotic.driver.crawl.entity.CrawlRule
 import ai.platon.exotic.driver.crawl.scraper.RuleStatus
+import ai.platon.exotic.driver.crawl.scraper.RuleType
 import ai.platon.exotic.services.api.component.CrawlTaskRunner
 import ai.platon.exotic.services.api.persist.CrawlRuleRepository
 import ai.platon.exotic.services.common.jackson.prettyScentObjectWritter
@@ -88,6 +89,9 @@ class CrawlRuleWebController(
         if (!rule.period.isNegative) { // 没用 cron
             rule.cronExpression = ""
         }
+        if (rule.type == RuleType.Entity.toString()) {
+            rule.outLinkSelector = ""
+        }
 
         repository.save(rule)
         return "redirect:/crawl/rules/"
@@ -120,6 +124,10 @@ class CrawlRuleWebController(
 
         if (!rule.period.isNegative) { // 没用 cron
             rule.cronExpression = ""
+        }
+
+        if (rule.type == RuleType.Entity.toString()) {
+            rule.outLinkSelector = ""
         }
 
         repository.save(rule)

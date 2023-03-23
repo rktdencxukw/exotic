@@ -46,7 +46,7 @@
                             <span th:if="${#fields.hasErrors('portalUrls')}" th:errors="*{portalUrls}"
                                   class="text-danger"></span>
                         </div>
-                        <div class="form-group">
+                        <div class="form-group" th:if="${rule.type != 'Entity'}">
                             <label for="outLinkSelector" class="col-form-label">The CSS selector to extract out links from portal urls:</label>
                             <input type="text" th:field="*{outLinkSelector}"
                                    class="form-control" id="outLinkSelector"

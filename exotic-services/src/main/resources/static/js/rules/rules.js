@@ -30,6 +30,15 @@ $(function() {
         }
     })
 
+    $('#type').change(function() {
+        let value = $('#type').val()
+        if (value === 'Entity') {
+            $('#outLinkSelectorGroup').hide()
+        } else {
+            $('#outLinkSelectorGroup').show()
+        }
+    })
+
     $('#cronExpressionBuilder').cronBuilder({
         onChange: function(expression) {
             $('#cronExpression').val(expression);
