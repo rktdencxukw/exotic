@@ -58,7 +58,7 @@
                                 <td th:text="${#temporals.format(task.createdDate, 'yyyy-MM-dd HH:mm:ss.SSS')}"></td>
                                 <td th:text="${#temporals.format(task.startTime, 'yyyy-MM-dd HH:mm:ss.SSS')}"></td>
                                 <td th:text="${#temporals.format(task.lastModifiedDate, 'yyyy-MM-dd HH:mm:ss.SSS')}"></td>
-                                <td th:text="${rule.status}"></td>
+                                <td th:text="${task.status}"></td>
                                 <td>
                                     <a th:href="${task.url}" th:text="${task.abbreviatedUrl}" target="_blank"></a>
                                 </td>
