@@ -27,6 +27,13 @@ class CrawlRuleWebController(
 ) {
     private val amazonSeeds = LinkExtractors.fromResource("sites/amazon/best-sellers.txt")
     private val amazonItemSQLTemplate = ResourceLoader.readString("sites/amazon/sqls/x-item.sql").trim()
+    private val sqlTemplate = """
+        select
+          dom_all_attrs(dom, 'a.news-flash-item-title', 'href') as ids,
+          dom_all_texts(dom, '.news-flash-item-title') as titles,
+          dom_all_texts(dom, '.news-flash-item-content') as contents
+        from load_and_select('{{url}}', 'body');
+    """
 
     @GetMapping("/")
     fun list(
@@ -53,19 +60,31 @@ class CrawlRuleWebController(
         return "crawl/rules/view"
     }
 
+//    @GetMapping("/add")
+//    fun showAddForm(model: Model): String {
+//        val rule = CrawlRule()
+//        rule.sqlTemplate = amazonItemSQLTemplate
+//
+//        val n = 2 + Random.nextInt(4)
+//        rule.portalUrls = amazonSeeds.shuffled().take(n).joinToString("\n")
+//        rule.outLinkSelector = "a[href~=/dp/]"
+//        rule.nextPageSelector = "ul.a-pagination li.a-last a"
+//
+//        model.addAttribute("rule", rule)
+//
+//        return "crawl/rules/add"
+//    }
+
     @GetMapping("/add")
-    fun showAddForm(model: Model): String {
+    fun create(model: Model): String {
+    //        getLogger(this).info(prettyScentObjectWritter().writeValueAsString(rule))
         val rule = CrawlRule()
-        rule.sqlTemplate = amazonItemSQLTemplate
-
-        val n = 2 + Random.nextInt(4)
-        rule.portalUrls = amazonSeeds.shuffled().take(n).joinToString("\n")
-        rule.outLinkSelector = "a[href~=/dp/]"
-        rule.nextPageSelector = "ul.a-pagination li.a-last a"
-
+        rule.id = 0L
+        rule.type = RuleType.Entity.toString()
+        rule.sqlTemplate = sqlTemplate
         model.addAttribute("rule", rule)
-
-        return "crawl/rules/add"
+        model.addAttribute("id", 0L)
+        return "crawl/rules/edit"
     }
 
     @GetMapping("/jd/add")
@@ -112,15 +131,19 @@ class CrawlRuleWebController(
         if (result.hasErrors()) {
             return "crawl/rules/edit"
         }
-
-        val old = repository.findById(id).orElseThrow { IllegalArgumentException("Invalid rule Id: $id") }
-        rule.status = old.status
-        rule.crawlCount = old.crawlCount
-        rule.createdDate = old.createdDate
-        rule.lastCrawlTime = old.lastCrawlTime
-        rule.crawlHistory = old.crawlHistory
-        rule.idsOfLast = old.idsOfLast
-        rule.type = old.type
+        if (id == 0L) {
+            rule.createdDate = Instant.now()
+            rule.status = RuleStatus.Created.toString()
+        } else {
+            val old = repository.findById(id).orElseThrow { IllegalArgumentException("Invalid rule Id: $id") }
+            rule.status = old.status
+            rule.crawlCount = old.crawlCount
+            rule.createdDate = old.createdDate
+            rule.lastCrawlTime = old.lastCrawlTime
+            rule.crawlHistory = old.crawlHistory
+            rule.idsOfLast = old.idsOfLast
+            rule.type = old.type
+        }
 
         if (!rule.period.isNegative) { // 没用 cron
             rule.cronExpression = ""
@@ -130,9 +153,9 @@ class CrawlRuleWebController(
             rule.outLinkSelector = ""
         }
 
-        repository.save(rule)
+        val ruleT = repository.save(rule)
 
-        return "redirect:/crawl/rules/view/$id"
+        return "redirect:/crawl/rules/view/${ruleT.id}"
     }
 
     @GetMapping("pause/{id}")

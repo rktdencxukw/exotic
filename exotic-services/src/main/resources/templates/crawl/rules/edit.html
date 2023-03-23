@@ -56,7 +56,8 @@
                         </div>
                         <div class="form-group d-none">
                             <label for="nextPageSelector" class="col-form-label">Next Page Selector<em class="required">*</em></label>
-                            <input type="text" th:field="*{nextPageSelector}" th:required="required"
+<!--                            <input type="text" th:field="*{nextPageSelector}" th:required="required"-->
+                            <input type="text" th:field="*{nextPageSelector}"
                                    class="form-control" id="nextPageSelector"
                                    placeholder="CSS selector for next page">
                             <span th:if="${#fields.hasErrors('nextPageSelector')}" th:errors="*{nextPageSelector}"
@@ -164,11 +165,19 @@
                 <div class="card my-3">
                     <div class="card-body">
                         <div class="form-group">
+                            <label for="labels" class="col-form-label">Rule Type</label>
                             <select th:field="*{type}" class="form-control">
                                 <option value="Portal" selected="selected">Portal</option>
                                 <option th:value="'Entity'">Entity</option>
                             </select>
                         </div>
+<!--                        <div class="form-group">-->
+<!--                            <label for="labels" class="col-form-label">Render Type</label>-->
+<!--                            <select th:field="*{render_type}" class="form-control">-->
+<!--                                <option value="Browser" selected="selected">Browser</option>-->
+<!--                                <option th:value="'Api'">Api</option>-->
+<!--                            </select>-->
+<!--                        </div>-->
                         <div class="form-group">
                             <label for="labels" class="col-form-label">Labels</label>
                             <input type="text" th:field="*{label}"
