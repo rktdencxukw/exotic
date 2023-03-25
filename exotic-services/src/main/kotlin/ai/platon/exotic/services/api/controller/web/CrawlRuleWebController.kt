@@ -5,14 +5,15 @@ import ai.platon.exotic.driver.crawl.entity.CrawlRule
 import ai.platon.exotic.driver.crawl.entity.PortalTask
 import ai.platon.exotic.driver.crawl.scraper.*
 import ai.platon.exotic.services.api.component.CrawlTaskRunner
-import ai.platon.exotic.services.api.controller.response.ResponseBody
+import ai.platon.exotic.services.api.controller.response.OhJsonRespBody
 import ai.platon.exotic.services.api.persist.CrawlRuleRepository
-import ai.platon.exotic.services.common.jackson.prettyScentObjectWritter
 import ai.platon.pulsar.common.LinkExtractors
 import ai.platon.pulsar.common.ResourceLoader
 import ai.platon.pulsar.common.getLogger
+import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
+import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
@@ -24,7 +25,13 @@ import java.util.stream.Collectors
 import javax.validation.Valid
 
 @Controller
-@RequestMapping("crawl/rules")
+
+@CrossOrigin
+@RequestMapping(
+    "crawl/rules",
+    consumes = [MediaType.TEXT_PLAIN_VALUE, "${MediaType.TEXT_PLAIN_VALUE};charset=UTF-8", MediaType.APPLICATION_JSON_VALUE],
+    produces = [MediaType.APPLICATION_JSON_VALUE]
+)
 class CrawlRuleWebController(
     private val repository: CrawlRuleRepository,
     private val crawlTaskRunner: CrawlTaskRunner,
@@ -44,25 +51,18 @@ from load_and_select('{{url}}', 'body');
     fun list(
         @RequestParam(defaultValue = "0") pageNumber: Int = 0,
         @RequestParam(defaultValue = "500") pageSize: Int = 500,
-        model: Model
-    ): String {
+    ): Page<CrawlRule> {
         val sort = Sort.Direction.DESC
         val sortProperty = "id"
         val pageable = PageRequest.of(pageNumber, pageSize, sort, sortProperty)
-        val rules = repository.findAllByStatusNot(RuleStatus.Archived.toString(), pageable)
-        model.addAttribute("rules", rules)
-        return "crawl/rules/index"
+        return repository.findAllByStatusNot(RuleStatus.Archived.toString(), pageable)
     }
 
     @GetMapping("/view/{id}")
-    fun view(@PathVariable id: Long, model: Model): String {
+    fun view(@PathVariable id: Long): CrawlRule {
         val rule = repository.getById(id)
-
-        model.addAttribute("rule", rule)
-        val tasks = rule.portalTasks.sortedByDescending { it.id }
-        model.addAttribute("tasks", tasks)
-
-        return "crawl/rules/view"
+        rule.portalTasks.sortedByDescending { it.id }
+        return rule
     }
 
 //    @GetMapping("/add")
@@ -80,32 +80,34 @@ from load_and_select('{{url}}', 'body');
 //        return "crawl/rules/add"
 //    }
 
-    @GetMapping("/add")
-    fun create(model: Model): String {
-        //        getLogger(this).info(prettyScentObjectWritter().writeValueAsString(rule))
-        val rule = CrawlRule()
-        rule.id = 0L
-        rule.type = RuleType.Entity.toString()
-        rule.sqlTemplate = sqlTemplate
-        model.addAttribute("rule", rule)
-        model.addAttribute("id", 0L)
-        return "crawl/rules/edit"
-    }
+//    @GetMapping("/add")
+//    fun create(model: Model): String {
+//        //        getLogger(this).info(prettyScentObjectWritter().writeValueAsString(rule))
+//        val rule = CrawlRule()
+//        rule.id = 0L
+//        rule.type = RuleType.Entity.toString()
+//        rule.sqlTemplate = sqlTemplate
+//        model.addAttribute("rule", rule)
+//        model.addAttribute("id", 0L)
+//        return "crawl/rules/edit"
+//    }
 
-    @GetMapping("/jd/add")
-    fun showJdAddForm(model: Model): String {
-        val rule = CrawlRule()
-        model.addAttribute("rule", rule)
-        return "crawl/rules/jd/add"
-    }
+//    @GetMapping("/jd/add")
+//    fun showJdAddForm(model: Model): String {
+//        val rule = CrawlRule()
+//        model.addAttribute("rule", rule)
+//        return "crawl/rules/jd/add"
+//    }
 
     @PostMapping("/add")
-    fun add(@Valid @ModelAttribute("rule") rule: CrawlRule, result: BindingResult, model: Model): String {
-        getLogger(this).info(prettyScentObjectWritter().writeValueAsString(rule))
+    fun add(@Valid @ModelAttribute("rule") rule: CrawlRule, errors: Errors): ResponseEntity<OhJsonRespBody<Any>> {
+//        getLogger(this).info(prettyScentObjectWritter().writeValueAsString(rule))
 
-        if (result.hasErrors()) {
-            // model.addAttribute("rule", rule)
-            return "crawl/rules/add"
+        if (errors.hasErrors()) {
+            val msg = errors.allErrors
+                .stream().map { x -> x.defaultMessage }
+                .collect(Collectors.joining(","))
+            return ResponseEntity.badRequest().body(OhJsonRespBody.error(msg))
         }
 
         rule.createdDate = Instant.now()
@@ -118,22 +120,22 @@ from load_and_select('{{url}}', 'body');
         }
 
         repository.save(rule)
-        return "redirect:/crawl/rules/"
+        return ResponseEntity.ok().body(OhJsonRespBody.ok())
     }
 
     @PostMapping("/test_run")
     fun testRun(
         @Valid @RequestBody rule: CrawlRule,
         errors: Errors
-    ): ResponseEntity<ResponseBody<Any>> {
-        getLogger(this).info(prettyScentObjectWritter().writeValueAsString(rule))
+    ): ResponseEntity<OhJsonRespBody<Any>> {
+//        getLogger(this).info(prettyScentObjectWritter().writeValueAsString(rule))
 
         //If error, just return a 400 bad request, along with the error message
         if (errors.hasErrors()) {
             val msg = errors.allErrors
                 .stream().map { x -> x.defaultMessage }
                 .collect(Collectors.joining(","))
-            return ResponseEntity.badRequest().body(ResponseBody.error(msg))
+            return ResponseEntity.badRequest().body(OhJsonRespBody.error(msg))
         }
         // TODO not retry
         var portalTask = PortalTask(rule.portalUrls, "", 3)
@@ -142,18 +144,23 @@ from load_and_select('{{url}}', 'body');
 
         val listenableScrapeTask = ListenableScrapeTask(scrapeTask).also {
             it.onSubmitted = {
-                it.task.status = TaskStatus.SUBMITTED }
+                it.task.status = TaskStatus.SUBMITTED
+            }
             it.onRetry = {
-                it.task.status = TaskStatus.RETRYING }
+                it.task.status = TaskStatus.RETRYING
+            }
             it.onSuccess = {
                 it.task.status = TaskStatus.OK
             }
             it.onFailed = {
-                it.task.status = TaskStatus.FAILED }
+                it.task.status = TaskStatus.FAILED
+            }
             it.onFinished = {
-                it.task.status = TaskStatus.OK }
+                it.task.status = TaskStatus.OK
+            }
             it.onTimeout = {
-                it.task.status = TaskStatus.FAILED }
+                it.task.status = TaskStatus.FAILED
+            }
         }
 
         val taskSubmitter = TaskSubmitter(exoticCrawler.driverSettings)
@@ -164,23 +171,34 @@ from load_and_select('{{url}}', 'body');
             Thread.sleep(1000)
         }
 
-        return ResponseEntity.ok(ResponseBody.ok(scrapeTask))
+        return ResponseEntity.ok(OhJsonRespBody.ok(scrapeTask))
     }
 
-    @GetMapping("/edit/{id}")
-    fun edit(@PathVariable("id") id: Long, model: Model): String {
-        val rule = repository.findById(id).orElseThrow { IllegalArgumentException("Invalid rule Id: $id") }
-        model.addAttribute("rule", rule)
-        return "crawl/rules/edit"
-    }
+//    @GetMapping("/edit/{id}")
+//    fun edit(@PathVariable("id") id: Long,
+//             @Valid @RequestBody rule: CrawlRule,
+//             errors: Errors
+//             ): ResponseEntity<OhJsonRespBody<Any>>{
+//        if (errors.hasErrors()) {
+//            val msg = errors.allErrors
+//                .stream().map { x -> x.defaultMessage }
+//                .collect(Collectors.joining(","))
+//            return ResponseEntity.badRequest().body(OhJsonRespBody.error(msg))
+//        }
+//        val rule = repository.findById(id).orElseThrow { IllegalArgumentException("Invalid rule Id: $id") }
+//        return ResponseEntity.ok(OhJsonRespBody.ok(rule))
+//    }
 
     @PostMapping("update/{id}")
     fun update(
-        @PathVariable("id") id: Long, @Valid rule: CrawlRule, result: BindingResult,
-        model: Model
-    ): String? {
-        if (result.hasErrors()) {
-            return "crawl/rules/edit"
+        @PathVariable("id") id: Long, @Valid rule: CrawlRule,
+        errors: Errors
+    ): ResponseEntity<OhJsonRespBody<Any>> {
+        if (errors.hasErrors()) {
+            val msg = errors.allErrors
+                .stream().map { x -> x.defaultMessage }
+                .collect(Collectors.joining(","))
+            return ResponseEntity.badRequest().body(OhJsonRespBody.error(msg))
         }
         if (id == 0L) {
             rule.createdDate = Instant.now()
@@ -206,21 +224,21 @@ from load_and_select('{{url}}', 'body');
 
         val ruleT = repository.save(rule)
 
-        return "redirect:/crawl/rules/view/${ruleT.id}"
+        return ResponseEntity.ok(OhJsonRespBody.ok())
     }
 
     @GetMapping("pause/{id}")
-    fun pause(@PathVariable("id") id: Long, model: Model): String {
+    fun pause(@PathVariable("id") id: Long): ResponseEntity<OhJsonRespBody<Any>> {
         val rule = repository.findById(id).orElseThrow { IllegalArgumentException("Invalid rule Id: $id") }
 
         rule.status = RuleStatus.Paused.toString()
         repository.save(rule)
 
-        return "redirect:/crawl/rules/"
+        return ResponseEntity.ok(OhJsonRespBody.ok())
     }
 
     @GetMapping("start/{id}")
-    fun start(@PathVariable("id") id: Long, model: Model): String {
+    fun start(@PathVariable("id") id: Long): ResponseEntity<OhJsonRespBody<Any>> {
         val rule = repository.findById(id).orElseThrow { IllegalArgumentException("Invalid rule Id: $id") }
 
         rule.status = RuleStatus.Created.toString()
@@ -229,31 +247,30 @@ from load_and_select('{{url}}', 'body');
 
         crawlTaskRunner.startCrawl(rule)
 
-        return "redirect:/crawl/rules/"
+        return ResponseEntity.ok(OhJsonRespBody.ok())
     }
 
-    @GetMapping("admin/")
-    fun adminList(
-        @RequestParam(defaultValue = "0") pageNumber: Int = 0,
-        @RequestParam(defaultValue = "500") pageSize: Int = 500,
-        model: Model
-    ): String {
-        val sort = Sort.Direction.DESC
-        val sortProperty = "id"
-        val pageable = PageRequest.of(pageNumber, pageSize, sort, sortProperty)
-        val rules = repository.findAll(pageable)
-        model.addAttribute("rules", rules)
-        return "crawl/rules/admin/index"
-    }
+//    @GetMapping("admin/")
+//    fun adminList(
+//        @RequestParam(defaultValue = "0") pageNumber: Int = 0,
+//        @RequestParam(defaultValue = "500") pageSize: Int = 500,
+//    ): String {
+//        val sort = Sort.Direction.DESC
+//        val sortProperty = "id"
+//        val pageable = PageRequest.of(pageNumber, pageSize, sort, sortProperty)
+//        val rules = repository.findAll(pageable)
+//        model.addAttribute("rules", rules)
+//        return "crawl/rules/admin/index"
+//    }
 
-    @GetMapping("admin/archive/{id}")
-    fun adminArchive(@PathVariable("id") id: Long, model: Model): String {
-        val rule = repository.findById(id).orElseThrow { IllegalArgumentException("Invalid rule Id: $id") }
+//    @GetMapping("admin/archive/{id}")
+//    fun adminArchive(@PathVariable("id") id: Long): String {
+//        val rule = repository.findById(id).orElseThrow { IllegalArgumentException("Invalid rule Id: $id") }
 
-        rule.status = RuleStatus.Archived.toString()
-//        rule.adjustFields()
-        repository.save(rule)
+//        rule.status = RuleStatus.Archived.toString()
+////        rule.adjustFields()
+//        repository.save(rule)
 
-        return "redirect:/crawl/rules/admin/"
-    }
+//        return "redirect:/crawl/rules/admin/"
+//    }
 }

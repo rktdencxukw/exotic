@@ -11,6 +11,8 @@ import com.cronutils.model.Cron
 import com.cronutils.model.CronType
 import com.cronutils.model.definition.CronDefinitionBuilder
 import com.cronutils.parser.CronParser
+import com.fasterxml.jackson.annotation.JsonIdentityInfo
+import com.fasterxml.jackson.annotation.ObjectIdGenerators
 import org.springframework.data.annotation.CreatedDate
 import org.springframework.data.annotation.LastModifiedDate
 import org.springframework.data.jpa.domain.support.AuditingEntityListener
@@ -26,6 +28,7 @@ import javax.persistence.*
 @Table(name = "crawl_rules")
 @Entity
 @EntityListeners(AuditingEntityListener::class)
+@JsonIdentityInfo(generator = ObjectIdGenerators.IntSequenceGenerator::class, property = "id")
 class CrawlRule {
 
     @Id
@@ -103,6 +106,7 @@ class CrawlRule {
      * */
     @Column(name = "timezone_offset_minutes")
     var timezoneOffsetMinutes: Int? = -480
+
     @CreatedDate
     @Column(name = "created_date")
     var createdDate: Instant = Instant.now()
@@ -111,7 +115,7 @@ class CrawlRule {
     @Column(name = "last_modified_date")
     var lastModifiedDate: Instant = Instant.now()
 
-//    @OneToMany(fetch = FetchType.LAZY)
+    //    @OneToMany(fetch = FetchType.LAZY)
     @OneToMany(mappedBy = "rule", fetch = FetchType.EAGER, cascade = [CascadeType.ALL])
     val portalTasks: MutableList<PortalTask> = mutableListOf()
 
@@ -121,9 +125,10 @@ class CrawlRule {
             return ZoneOffset.ofHoursMinutes(minutes / 60, minutes % 60)
         }
 
-    val portalUrlList get() = portalUrls.split("\n")
-        .filter { it.isNotBlank() }
-        .filter { UrlUtils.isValidUrl(it) }
+    val portalUrlList
+        get() = portalUrls.split("\n")
+            .filter { it.isNotBlank() }
+            .filter { UrlUtils.isValidUrl(it) }
 
     val descriptivePeriod: String
         get() {
