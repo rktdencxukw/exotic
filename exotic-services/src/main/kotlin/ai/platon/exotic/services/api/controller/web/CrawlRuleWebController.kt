@@ -24,9 +24,9 @@ import java.time.Instant
 import java.util.stream.Collectors
 import javax.validation.Valid
 
-@Controller
 
-@CrossOrigin
+@CrossOrigin(origins = ["*"], allowCredentials = "false", maxAge = -1, allowedHeaders = ["*"], methods = [RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE, RequestMethod.HEAD])
+@Controller
 @RequestMapping(
     "crawl/rules",
     consumes = [MediaType.TEXT_PLAIN_VALUE, "${MediaType.TEXT_PLAIN_VALUE};charset=UTF-8", MediaType.APPLICATION_JSON_VALUE],
