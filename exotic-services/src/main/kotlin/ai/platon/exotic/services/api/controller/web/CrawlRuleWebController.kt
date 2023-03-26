@@ -55,14 +55,16 @@ from load_and_select('{{url}}', 'body');
         val sort = Sort.Direction.DESC
         val sortProperty = "id"
         val pageable = PageRequest.of(pageNumber, pageSize, sort, sortProperty)
-        return repository.findAllByStatusNot(RuleStatus.Archived.toString(), pageable)
+        val rsp = repository.findAllByStatusNot(RuleStatus.Archived.toString(), pageable)
+        return ResponseEntity.ok(rsp).body!!
     }
 
     @GetMapping("/view/{id}")
     fun view(@PathVariable id: Long): CrawlRule {
         val rule = repository.getById(id)
+        // TODO 分页
         rule.portalTasks.sortedByDescending { it.id }
-        return rule
+        return ResponseEntity.ok(rule).body!!
     }
 
 //    @GetMapping("/add")

@@ -13,6 +13,8 @@ import org.springframework.context.annotation.Bean
 import org.springframework.core.env.Environment
 import org.springframework.core.env.get
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing
+import org.springframework.web.servlet.config.annotation.CorsRegistry
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
 import org.thymeleaf.templateresolver.FileTemplateResolver
 import org.thymeleaf.templateresolver.ITemplateResolver
 import java.nio.file.Files
@@ -41,6 +43,20 @@ class ExoticApplication(
     @PostConstruct
     fun postConstruct() {
         logger.info("Database url: {}", env["spring.datasource.url"])
+    }
+
+    @Bean
+    fun CORSConfigurer(): WebMvcConfigurer? {
+        return object : WebMvcConfigurer {
+            override fun addCorsMappings(registry: CorsRegistry) {
+                registry.addMapping("/**")
+                    .allowedOrigins("*")
+                    .allowedHeaders("*")
+                    .allowedMethods("GET", "POST", "PUT", "DELETE", "HEAD")
+                    .maxAge(-1) // add maxAge
+                    .allowCredentials(false)
+            }
+        }
     }
 
     @Bean
