@@ -2,6 +2,7 @@ package ai.platon.exotic.driver.crawl.entity
 
 import ai.platon.exotic.driver.common.ExoticUtils
 import ai.platon.exotic.driver.common.NameGenerator
+import ai.platon.exotic.driver.crawl.scraper.RenderType
 import ai.platon.exotic.driver.crawl.scraper.RuleStatus
 import ai.platon.exotic.driver.crawl.scraper.RuleType
 import ai.platon.pulsar.common.DateTimes
@@ -93,6 +94,9 @@ class CrawlRule {
 
     @Column(name = "type", length = 16)
     var type: String? = RuleType.Portal.toString()
+
+    @Column(name = "render_type", length = 16)
+    var renderType: String? = RenderType.Browser.toString()
 
     /**
      * ids of last page in EntityListRule or last item in EntityItemRule

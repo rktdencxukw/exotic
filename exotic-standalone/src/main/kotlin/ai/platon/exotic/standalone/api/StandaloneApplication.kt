@@ -16,13 +16,15 @@ import org.springframework.scheduling.annotation.EnableScheduling
     scanBasePackages = [
         "ai.platon.scent.boot.autoconfigure",
         "ai.platon.scent.rest.api",
-        "ai.platon.exotic.services.api"
+        "ai.platon.exotic.services.api",
+        "ai.platon.pulsar.driver.report"
     ]
 )
 @ComponentScan(
     "ai.platon.scent.rest.api",
     "ai.platon.exotic.services.api",
     "ai.platon.exotic.standalone.api",
+    "ai.platon.pulsar.driver.report", // 扫描 driver中http report controller
 )
 @EntityScan(
     "ai.platon.exotic.driver.crawl.entity",

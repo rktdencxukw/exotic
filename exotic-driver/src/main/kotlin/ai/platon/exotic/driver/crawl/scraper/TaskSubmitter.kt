@@ -22,11 +22,12 @@ import kotlin.random.Random
 
 open class TaskSubmitter(
     private val driverSettings: DriverSettings,
+    private val reportServer: String = "",
     private val autoCollect: Boolean = true,
-): AutoCloseable {
+) : AutoCloseable {
     var logger: Logger = LoggerFactory.getLogger(TaskSubmitter::class.java)
-    var dryRun = System.getProperty("scrape.submitter.dry.run") == "true"
-    var driver = Driver(driverSettings)
+    private var dryRun = System.getProperty("scrape.submitter.dry.run") == "true"
+    var driver = Driver(driverSettings.scrapeServer, driverSettings.authToken, reportServer)
 
     private val pendingTasks: MutableMap<String, ListenableScrapeTask> = ConcurrentSkipListMap()
     private val retryingTaskIds: ConcurrentSkipListSet<String> = ConcurrentSkipListSet()
@@ -63,8 +64,10 @@ open class TaskSubmitter(
     fun scrape(task: ListenableScrapeTask): ListenableScrapeTask {
         ++scrapeId
         // print current stacktrace 
-        logger.info("{}.\tScraping 1/{}/{} task | {} {}",
-            scrapeId, pendingTasks.size, totalTaskCount, task.task.url, task.task.args)
+        logger.info(
+            "{}.\tScraping 1/{}/{} task | {} {}",
+            scrapeId, pendingTasks.size, totalTaskCount, task.task.url, task.task.args
+        )
         return submit(task)
     }
 
@@ -98,7 +101,12 @@ open class TaskSubmitter(
             val id = if (dryRun) {
                 "mock." + RandomStringUtils.randomAlphanumeric(10)
             } else {
-                driver.submit(sql, task.priority, false)
+//                driver.submit(sql, task.priority, false)
+                driver.submitWithProcess(sql) {
+                    listenableTask.task.response = it
+                    listenableTask.onFinished()
+                    return@submitWithProcess 0u
+                }
             }
             task.serverTaskId = id
 
@@ -211,11 +219,13 @@ open class TaskSubmitter(
             roundTimeoutTasks.forEach { pendingTasks.remove(it.key) }
         }
 
-        val estimatedTime = responses.filter { !isCompleted(it) }.minOfOrNull { it.estimatedWaitTime }?.takeIf { it > 0 } ?: 0
+        val estimatedTime =
+            responses.filter { !isCompleted(it) }.minOfOrNull { it.estimatedWaitTime }?.takeIf { it > 0 } ?: 0
         val nextCheckTime = estimatedTime.coerceAtLeast(collectTimerPeriod.seconds)
         val elapsedTime = Duration.between(startTime, Instant.now())
         val rand = Random.nextInt(10)
-        val description = if (rand == 0) " | (failed/retry/responses/checking/pending total failed/success/retry/finished)" else ""
+        val description =
+            if (rand == 0) " | (failed/retry/responses/checking/pending total failed/success/retry/finished)" else ""
         logger.info(
             "{}.\tCollected {}/{}/{}/{}/{} responses in {}, total {}/{}/{}/{}, recheck after {}s$description",
             collectId,

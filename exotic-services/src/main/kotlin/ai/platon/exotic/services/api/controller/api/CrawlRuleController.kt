@@ -9,16 +9,22 @@ import ai.platon.exotic.services.api.controller.response.OhJsonRespBody
 import ai.platon.exotic.services.api.persist.CrawlRuleRepository
 import ai.platon.pulsar.common.LinkExtractors
 import ai.platon.pulsar.common.ResourceLoader
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.web.context.WebServerApplicationContext
+import org.springframework.boot.web.server.WebServer
+import org.springframework.core.env.Environment
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
-import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.*
+import org.springframework.web.server.adapter.WebHttpHandlerBuilder.applicationContext
+import java.time.Duration
 import java.time.Instant
 import java.util.stream.Collectors
+import javax.annotation.PostConstruct
 import javax.validation.Valid
 
 
@@ -33,6 +39,8 @@ class CrawlRuleController(
     private val repository: CrawlRuleRepository,
     private val crawlTaskRunner: CrawlTaskRunner,
     private val exoticCrawler: ExoticCrawler,
+    @Autowired
+    private val env: Environment
 ) {
     private val amazonSeeds = LinkExtractors.fromResource("sites/amazon/best-sellers.txt")
     private val amazonItemSQLTemplate = ResourceLoader.readString("sites/amazon/sqls/x-item.sql").trim()
@@ -43,6 +51,15 @@ select
   dom_all_texts(dom, '.news-flash-item-content') as contents
 from load_and_select('{{url}}', 'body');
     """
+
+    lateinit var reportServer: String
+
+    @PostConstruct
+    fun init() {
+        reportServer = "http://127.0.0.1:${env.getProperty("server.port")}${env.getProperty("server.servlet.context-path")}"
+        println("kcdebug. Web server url: $reportServer")
+    }
+
 
     @GetMapping("/")
     fun list(
@@ -126,7 +143,7 @@ from load_and_select('{{url}}', 'body');
     fun testRun(
         @Valid @RequestBody rule: CrawlRule,
         errors: Errors
-    ): ResponseEntity<OhJsonRespBody<Any>> {
+    ): ResponseEntity<OhJsonRespBody<ScrapeTask>> {
 //        getLogger(this).info(prettyScentObjectWritter().writeValueAsString(rule))
 
         //If error, just return a 400 bad request, along with the error message
@@ -134,7 +151,7 @@ from load_and_select('{{url}}', 'body');
             val msg = errors.allErrors
                 .stream().map { x -> x.defaultMessage }
                 .collect(Collectors.joining(","))
-            return ResponseEntity.badRequest().body(OhJsonRespBody.error(msg))
+            return ResponseEntity.badRequest().body(OhJsonRespBody(ScrapeTask.Empty).error(msg))
         }
         // TODO not retry
         var portalTask = PortalTask(rule.portalUrls, "", 3)
@@ -162,15 +179,20 @@ from load_and_select('{{url}}', 'body');
             }
         }
 
-        val taskSubmitter = TaskSubmitter(exoticCrawler.driverSettings)
+        val taskSubmitter = TaskSubmitter(exoticCrawler.driverSettings, reportServer)
         taskSubmitter.scrape(listenableScrapeTask)
 
+        val startTime = Instant.now()
         while (scrapeTask.status != TaskStatus.OK || scrapeTask.status != TaskStatus.FAILED) {
+            if ( Duration.between(startTime, Instant.now()).toSeconds() > 2 * 60) {
+                return ResponseEntity.ok(OhJsonRespBody(ScrapeTask.Empty).error("timeout"))
+            }
             // sleep 1s
             Thread.sleep(1000)
+
         }
 
-        return ResponseEntity.ok(OhJsonRespBody.ok(scrapeTask))
+        return ResponseEntity.ok(OhJsonRespBody(scrapeTask))
     }
 
 //    @GetMapping("/edit/{id}")

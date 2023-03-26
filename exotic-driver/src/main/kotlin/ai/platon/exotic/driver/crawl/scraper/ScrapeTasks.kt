@@ -18,6 +18,11 @@ enum class RuleType {
     Entity,
 }
 
+enum class RenderType {
+    Browser,
+    Api,
+}
+
 enum class TaskStatus(
     private val value: Int,
     private val series: Series,
@@ -62,6 +67,7 @@ class ListenablePortalTask(
         }
     }
 }
+
 
 class ScrapeTask constructor(
     val url: String,
@@ -113,6 +119,11 @@ class ScrapeTask constructor(
 
     override fun compareTo(other: ScrapeTask): Int {
         return configuredUrl.compareTo(other.configuredUrl)
+    }
+
+    companion object {
+        @JvmStatic
+        val Empty = ScrapeTask("", "", 0, "")
     }
 }
 
