@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RequestParam
 @CrossOrigin
 @Controller
 @RequestMapping("crawl/remote/tasks",
-    consumes = [MediaType.TEXT_PLAIN_VALUE, "${MediaType.TEXT_PLAIN_VALUE};charset=UTF-8", MediaType.APPLICATION_JSON_VALUE],
+//    consumes = [MediaType.TEXT_PLAIN_VALUE, "${MediaType.TEXT_PLAIN_VALUE};charset=UTF-8", MediaType.APPLICATION_JSON_VALUE],
     produces = [MediaType.APPLICATION_JSON_VALUE]
     )
 class RemoteTaskWebController(

@@ -28,7 +28,7 @@ import javax.persistence.*
 @Table(name = "crawl_rules")
 @Entity
 @EntityListeners(AuditingEntityListener::class)
-@JsonIdentityInfo(generator = ObjectIdGenerators.IntSequenceGenerator::class, property = "id")
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator::class, property = "id")
 class CrawlRule {
 
     @Id

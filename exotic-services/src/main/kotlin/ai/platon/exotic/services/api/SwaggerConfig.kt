@@ -35,7 +35,7 @@ public class SwaggerConfig {
     fun documentation(): Docket {
         return Docket(DocumentationType.SWAGGER_2)
             .select()
-            .apis(RequestHandlerSelectors.basePackage("ai.platon.exotic.services.api.controller"))
+            .apis(RequestHandlerSelectors.basePackage("ai.platon.exotic.services.api.controller.api"))
             .paths(PathSelectors.any())
             .build()
             .pathMapping("/")

@@ -1,4 +1,4 @@
-package ai.platon.exotic.services.api.controller.web
+package ai.platon.exotic.services.api.controller.api
 
 import ai.platon.exotic.driver.crawl.entity.PortalTask
 import ai.platon.exotic.services.api.persist.PortalTaskRepository
@@ -7,20 +7,15 @@ import org.springframework.data.domain.Sort
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Controller
-import org.springframework.ui.Model
-import org.springframework.web.bind.annotation.CrossOrigin
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestParam
+import org.springframework.web.bind.annotation.*
 
 @CrossOrigin
-@Controller
-@RequestMapping("crawl/portal-tasks",
+@RestController
+@RequestMapping("api/crawl/portal-tasks",
 //    consumes = [MediaType.TEXT_PLAIN_VALUE, "${MediaType.TEXT_PLAIN_VALUE};charset=UTF-8", MediaType.APPLICATION_JSON_VALUE],
     produces = [MediaType.APPLICATION_JSON_VALUE]
     )
-class PortalTaskWebController(
+class PortalTaskController(
     private val repository: PortalTaskRepository
 ) {
     @GetMapping("/")

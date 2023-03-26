@@ -2,6 +2,7 @@ package ai.platon.exotic.driver.crawl.entity
 
 import ai.platon.exotic.driver.crawl.scraper.TaskStatus
 import com.fasterxml.jackson.annotation.JsonIdentityInfo
+import com.fasterxml.jackson.annotation.JsonIdentityReference
 import com.fasterxml.jackson.annotation.ObjectIdGenerators
 import org.springframework.data.annotation.CreatedDate
 import org.springframework.data.annotation.LastModifiedDate
@@ -12,7 +13,7 @@ import javax.persistence.*
 @Table(name = "page_tasks")
 @Entity
 @EntityListeners(AuditingEntityListener::class)
-@JsonIdentityInfo(generator = ObjectIdGenerators.IntSequenceGenerator::class, property = "id")
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator::class, property = "id")
 class PageTask(
     var url: String
 ) {
@@ -21,6 +22,7 @@ class PageTask(
     @Column(name = "id", nullable = false)
     var id: Long? = null
 
+    @JsonIdentityReference(alwaysAsId = true)
     @ManyToOne
     var portalTask: PortalTask? = null
 
