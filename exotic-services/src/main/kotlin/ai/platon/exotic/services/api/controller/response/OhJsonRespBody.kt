@@ -10,12 +10,13 @@ class OhJsonRespBody<T> {
     }
 
     constructor() {
-        this.data = "" as T
+        this.data = null as T
     }
 
     fun error(errMsg:String): OhJsonRespBody<T> {
         this.code = -1
         this.message = errMsg
+        this.data = null
         return this
     }
 

@@ -143,7 +143,7 @@ from load_and_select('{{url}}', 'body');
     fun testRun(
         @Valid @RequestBody rule: CrawlRule,
         errors: Errors
-    ): ResponseEntity<OhJsonRespBody<ScrapeTask>> {
+    ): ResponseEntity<OhJsonRespBody<ScrapeTask?>> {
 //        getLogger(this).info(prettyScentObjectWritter().writeValueAsString(rule))
 
         //If error, just return a 400 bad request, along with the error message
@@ -151,7 +151,7 @@ from load_and_select('{{url}}', 'body');
             val msg = errors.allErrors
                 .stream().map { x -> x.defaultMessage }
                 .collect(Collectors.joining(","))
-            return ResponseEntity.badRequest().body(OhJsonRespBody(ScrapeTask.Empty).error(msg))
+            return ResponseEntity.badRequest().body(OhJsonRespBody<ScrapeTask?>().error(msg))
         }
         // TODO not retry
         var portalTask = PortalTask(rule.portalUrls, "", 3)
@@ -183,9 +183,9 @@ from load_and_select('{{url}}', 'body');
         taskSubmitter.scrape(listenableScrapeTask)
 
         val startTime = Instant.now()
-        while (scrapeTask.status != TaskStatus.OK || scrapeTask.status != TaskStatus.FAILED) {
+        while (scrapeTask.status != TaskStatus.OK && scrapeTask.status != TaskStatus.FAILED) {
             if ( Duration.between(startTime, Instant.now()).toSeconds() > 2 * 60) {
-                return ResponseEntity.ok(OhJsonRespBody(ScrapeTask.Empty).error("timeout"))
+                return ResponseEntity.ok(OhJsonRespBody<ScrapeTask?>().error("timeout"))
             }
             // sleep 1s
             Thread.sleep(1000)
