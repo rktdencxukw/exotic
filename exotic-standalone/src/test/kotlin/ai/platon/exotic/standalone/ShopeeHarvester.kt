@@ -1,7 +1,5 @@
 package ai.platon.exotic.standalone
 
-import ai.platon.exotic.standalone.common.VerboseHarvester
-
 fun main() {
     val portalUrl = "https://shopee.sg/Computers-Peripherals-cat.11013247"
     val args = "-ol a[href~=sp_atk] -tl 20 -ignoreFailure" +

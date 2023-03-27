@@ -1,7 +1,5 @@
 package ai.platon.exotic
 
-import ai.platon.exotic.handlers.AmazonHtmlIntegrityChecker
-import ai.platon.exotic.handlers.JdHtmlIntegrityChecker
 import ai.platon.pulsar.common.config.ImmutableConfig
 import ai.platon.pulsar.protocol.browser.emulator.BrowserResponseEvents
 import ai.platon.pulsar.protocol.browser.emulator.BrowserResponseHandler
@@ -32,10 +30,6 @@ class ExoticServerApplication(
 ) {
     @Bean
     fun initBrowserResponseHandler() {
-        browserResponseHandler.emit(BrowserResponseEvents.initHTMLIntegrityChecker,
-            AmazonHtmlIntegrityChecker(immutableConfig))
-        browserResponseHandler.emit(BrowserResponseEvents.initHTMLIntegrityChecker,
-            JdHtmlIntegrityChecker(immutableConfig))
     }
 
     @Bean

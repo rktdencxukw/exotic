@@ -103,14 +103,14 @@ from load_and_select('{{url}}', 'body');
 //    }
 
     @PostMapping("/add")
-    fun add(@Valid @ModelAttribute("rule") rule: CrawlRule, errors: Errors): ResponseEntity<OhJsonRespBody<Any>> {
+    fun add(@Valid @ModelAttribute("rule") rule: CrawlRule, errors: Errors): ResponseEntity<OhJsonRespBody<String>> {
 //        getLogger(this).info(prettyScentObjectWritter().writeValueAsString(rule))
 
         if (errors.hasErrors()) {
             val msg = errors.allErrors
                 .stream().map { x -> x.defaultMessage }
                 .collect(Collectors.joining(","))
-            return ResponseEntity.badRequest().body(OhJsonRespBody.error(msg))
+            return ResponseEntity.badRequest().body(OhJsonRespBody<String>().error(msg))
         }
 
         rule.createdDate = Instant.now()
@@ -196,12 +196,12 @@ from load_and_select('{{url}}', 'body');
     fun update(
         @PathVariable("id") id: Long, @Valid rule: CrawlRule,
         errors: Errors
-    ): ResponseEntity<OhJsonRespBody<Any>> {
+    ): ResponseEntity<OhJsonRespBody<String>> {
         if (errors.hasErrors()) {
             val msg = errors.allErrors
                 .stream().map { x -> x.defaultMessage }
                 .collect(Collectors.joining(","))
-            return ResponseEntity.badRequest().body(OhJsonRespBody.error(msg))
+            return ResponseEntity.badRequest().body(OhJsonRespBody<String>().error(msg))
         }
         if (id == 0L) {
             rule.createdDate = Instant.now()
@@ -231,7 +231,7 @@ from load_and_select('{{url}}', 'body');
     }
 
     @GetMapping("pause/{id}")
-    fun pause(@PathVariable("id") id: Long): ResponseEntity<OhJsonRespBody<Any>> {
+    fun pause(@PathVariable("id") id: Long): ResponseEntity<OhJsonRespBody<String>> {
         val rule = repository.findById(id).orElseThrow { IllegalArgumentException("Invalid rule Id: $id") }
 
         rule.status = RuleStatus.Paused.toString()
@@ -241,7 +241,7 @@ from load_and_select('{{url}}', 'body');
     }
 
     @GetMapping("start/{id}")
-    fun start(@PathVariable("id") id: Long): ResponseEntity<OhJsonRespBody<Any>> {
+    fun start(@PathVariable("id") id: Long): ResponseEntity<OhJsonRespBody<String>> {
         val rule = repository.findById(id).orElseThrow { IllegalArgumentException("Invalid rule Id: $id") }
 
         rule.status = RuleStatus.Created.toString()

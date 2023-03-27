@@ -1,7 +1,6 @@
 package ai.platon.exotic.standalone.starter
 
 import ai.platon.exotic.standalone.api.StandaloneApplication
-import ai.platon.exotic.standalone.common.VerboseHarvester
 import ai.platon.pulsar.browser.common.BrowserSettings
 import ai.platon.pulsar.common.ResourceLoader
 import ai.platon.pulsar.common.options.LoadOptions
@@ -80,8 +79,6 @@ class ExoticExecutor(val argv: Array<String>) {
         }
 
         when {
-            arrange -> arrange()
-            harvest -> harvest()
             scrape -> scrape()
             server -> runServer()
             sql.isNotBlank() -> executeSQL()
@@ -182,32 +179,6 @@ class ExoticExecutor(val argv: Array<String>) {
         }
     }
 
-    internal fun arrange() {
-        val (portalUrl, args) = UrlUtils.splitUrlArgs(configuredUrl)
-        if (!UrlUtils.isStandard(portalUrl)) {
-            System.err.println("The portal url is invalid")
-            return
-        }
-
-        runBlocking {
-            val harvester = VerboseHarvester()
-            val groups = harvester.arrangeLinks(configuredUrl)
-            harvester.printAllAnchorGroups(groups)
-        }
-    }
-
-    internal fun harvest() {
-        val (portalUrl, args) = UrlUtils.splitUrlArgs(configuredUrl)
-        if (!UrlUtils.isStandard(portalUrl)) {
-            System.err.println("The portal url is invalid")
-            return
-        }
-
-        runBlocking {
-            VerboseHarvester().harvest(portalUrl, args)
-        }
-    }
-
     internal fun executeSQL() {
         val context = ScentSQLContexts.create()
         val rs = context.executeQuery(sql)
@@ -237,16 +208,7 @@ class ExoticExecutor(val argv: Array<String>) {
             val arg = argv[i]
             val isLastArg = i == argv.size - 1
 
-            if (arg == "harvest") {
-                if (isLastArg) {
-                    criticalHelp = true
-                    break
-                }
-
-                harvest = true
-                configuredUrl = argv.drop(i + 1).joinToString(" ")
-                break
-            } else if (arg == "arrange") {
+            if (arg == "arrange") {
                 if (isLastArg) {
                     criticalHelp = true
                     break
