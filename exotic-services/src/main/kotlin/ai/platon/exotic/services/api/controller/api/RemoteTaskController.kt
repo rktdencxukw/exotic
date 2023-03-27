@@ -66,6 +66,6 @@ class RemoteTaskController(
     @GetMapping("/view/{id}")
     fun view(@PathVariable id: String): ResponseEntity<ScrapeResponse> {
         val task = driver.findById(id)
-        return ResponseEntity.ok().body(task)
+        return ResponseEntity.ok(task)
     }
 }

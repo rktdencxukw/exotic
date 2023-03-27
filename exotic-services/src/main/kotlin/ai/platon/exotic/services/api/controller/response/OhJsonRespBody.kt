@@ -35,9 +35,9 @@ class OhJsonRespBody<T> {
             }
         }
 
-        fun ok(): OhJsonRespBody<Any>? {
-            return OhJsonRespBody<Any>().apply {
-                this.data = "" as Any
+        fun ok(): OhJsonRespBody<String>? {
+            return OhJsonRespBody<String>().apply {
+                this.data = ""
             }
         }
         fun ok(data: Any): OhJsonRespBody<Any>? {

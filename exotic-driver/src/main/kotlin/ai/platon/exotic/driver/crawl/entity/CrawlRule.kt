@@ -119,6 +119,7 @@ class CrawlRule {
     @Column(name = "last_modified_date")
     var lastModifiedDate: Instant = Instant.now()
 
+    // TODO 延迟加载，分页
     //    @OneToMany(fetch = FetchType.LAZY)
     @OneToMany(mappedBy = "rule", fetch = FetchType.EAGER, cascade = [CascadeType.ALL])
     val portalTasks: MutableList<PortalTask> = mutableListOf()

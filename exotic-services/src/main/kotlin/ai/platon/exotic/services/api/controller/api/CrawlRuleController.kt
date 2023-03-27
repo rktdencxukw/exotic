@@ -65,20 +65,20 @@ from load_and_select('{{url}}', 'body');
     fun list(
         @RequestParam(defaultValue = "0") pageNumber: Int = 0,
         @RequestParam(defaultValue = "500") pageSize: Int = 500,
-    ): Page<CrawlRule> {
+    ): ResponseEntity<Page<CrawlRule>> {
         val sort = Sort.Direction.DESC
         val sortProperty = "id"
         val pageable = PageRequest.of(pageNumber, pageSize, sort, sortProperty)
         val rsp = repository.findAllByStatusNot(RuleStatus.Archived.toString(), pageable)
-        return ResponseEntity.ok(rsp).body!!
+        return ResponseEntity.ok(rsp)
     }
 
     @GetMapping("/view/{id}")
-    fun view(@PathVariable id: Long): CrawlRule {
+    fun view(@PathVariable id: Long): ResponseEntity<CrawlRule> {
         val rule = repository.getById(id)
         // TODO 分页
         rule.portalTasks.sortedByDescending { it.id }
-        return ResponseEntity.ok(rule).body!!
+        return ResponseEntity.ok(rule)
     }
 
 //    @GetMapping("/add")
@@ -116,14 +116,14 @@ from load_and_select('{{url}}', 'body');
 //    }
 
     @PostMapping("/add")
-    fun add(@Valid @ModelAttribute("rule") rule: CrawlRule, errors: Errors): ResponseEntity<OhJsonRespBody<Any>> {
+    fun add(@Valid @RequestBody rule: CrawlRule, errors: Errors): ResponseEntity<OhJsonRespBody<String>> {
 //        getLogger(this).info(prettyScentObjectWritter().writeValueAsString(rule))
 
         if (errors.hasErrors()) {
             val msg = errors.allErrors
                 .stream().map { x -> x.defaultMessage }
                 .collect(Collectors.joining(","))
-            return ResponseEntity.badRequest().body(OhJsonRespBody.error(msg))
+            return ResponseEntity.badRequest().body(OhJsonRespBody<String>().error(msg))
         }
 
         rule.createdDate = Instant.now()
@@ -212,14 +212,14 @@ from load_and_select('{{url}}', 'body');
 
     @PostMapping("update/{id}")
     fun update(
-        @PathVariable("id") id: Long, @Valid rule: CrawlRule,
+        @PathVariable("id") id: Long, @Valid @RequestBody rule: CrawlRule,
         errors: Errors
-    ): ResponseEntity<OhJsonRespBody<Any>> {
+    ): ResponseEntity<OhJsonRespBody<String>> {
         if (errors.hasErrors()) {
             val msg = errors.allErrors
                 .stream().map { x -> x.defaultMessage }
                 .collect(Collectors.joining(","))
-            return ResponseEntity.badRequest().body(OhJsonRespBody.error(msg))
+            return ResponseEntity.badRequest().body(OhJsonRespBody<String>().error(msg))
         }
         if (id == 0L) {
             rule.createdDate = Instant.now()
@@ -249,7 +249,7 @@ from load_and_select('{{url}}', 'body');
     }
 
     @GetMapping("pause/{id}")
-    fun pause(@PathVariable("id") id: Long): ResponseEntity<OhJsonRespBody<Any>> {
+    fun pause(@PathVariable("id") id: Long): ResponseEntity<OhJsonRespBody<String>> {
         val rule = repository.findById(id).orElseThrow { IllegalArgumentException("Invalid rule Id: $id") }
 
         rule.status = RuleStatus.Paused.toString()
@@ -259,7 +259,7 @@ from load_and_select('{{url}}', 'body');
     }
 
     @GetMapping("start/{id}")
-    fun start(@PathVariable("id") id: Long): ResponseEntity<OhJsonRespBody<Any>> {
+    fun start(@PathVariable("id") id: Long): ResponseEntity<OhJsonRespBody<String>> {
         val rule = repository.findById(id).orElseThrow { IllegalArgumentException("Invalid rule Id: $id") }
 
         rule.status = RuleStatus.Created.toString()
