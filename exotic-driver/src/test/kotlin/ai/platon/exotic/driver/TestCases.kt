@@ -1,7 +1,6 @@
 package ai.platon.exotic.driver
 
 import ai.platon.exotic.driver.common.ExoticUtils
-import ai.platon.exotic.driver.common.IS_DEVELOPMENT
 import ai.platon.exotic.driver.common.IS_PRODUCT
 import ai.platon.exotic.driver.common.NameGenerator
 import org.apache.commons.lang3.SystemUtils

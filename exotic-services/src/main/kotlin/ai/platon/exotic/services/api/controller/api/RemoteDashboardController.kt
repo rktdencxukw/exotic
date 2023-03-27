@@ -2,7 +2,6 @@ package ai.platon.exotic.services.api.controller.api
 
 import ai.platon.exotic.driver.crawl.ExoticCrawler
 import com.google.gson.GsonBuilder
-import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping

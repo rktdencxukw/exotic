@@ -16,15 +16,6 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>ai.platon.pulsar</groupId>
-			<artifactId>pulsar-dom</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>ai.platon.pulsar</groupId>
-			<artifactId>pulsar-ql-common</artifactId>
-		</dependency>
-
-		<dependency>
 			<groupId>ai.platon.exotic</groupId>
 			<artifactId>exotic-driver</artifactId>
 			<version>${project.parent.version}</version>

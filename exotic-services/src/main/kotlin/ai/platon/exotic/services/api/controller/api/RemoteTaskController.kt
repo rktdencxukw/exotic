@@ -1,13 +1,12 @@
 package ai.platon.exotic.services.api.controller.api
 
+//import ai.platon.exotic.services.common.jackson.scentObjectMapper
 import ai.platon.exotic.driver.crawl.ExoticCrawler
 import ai.platon.exotic.services.api.entity.api.ExpandedScrapeResponse
-//import ai.platon.exotic.services.common.jackson.scentObjectMapper
 import ai.platon.pulsar.driver.ScrapeResponse
 import org.springframework.data.domain.PageRequest
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
-import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.*
 
 @CrossOrigin

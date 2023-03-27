@@ -9,15 +9,12 @@ import ai.platon.exotic.services.api.controller.response.OhJsonRespBody
 import ai.platon.exotic.services.api.persist.CrawlRuleRepository
 import ai.platon.pulsar.common.LinkExtractors
 import ai.platon.pulsar.common.ResourceLoader
-import ai.platon.pulsar.common.getLogger
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Controller
-import org.springframework.ui.Model
-import org.springframework.validation.BindingResult
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.*
 import java.time.Instant

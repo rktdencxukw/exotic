@@ -20,11 +20,6 @@
             <artifactId>pulsar-common</artifactId>
             <version>${pulsar.version}</version>
         </dependency>
-        <dependency>
-            <groupId>ai.platon.pulsar</groupId>
-            <artifactId>pulsar-dom</artifactId>
-            <version>${pulsar.version}</version>
-        </dependency>
 
         <dependency>
             <groupId>ai.platon.pulsar</groupId>

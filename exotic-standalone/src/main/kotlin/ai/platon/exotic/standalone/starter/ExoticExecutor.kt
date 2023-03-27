@@ -11,7 +11,6 @@ import ai.platon.scent.boot.autoconfigure.ScentContextInitializer
 import ai.platon.scent.dom.HarvestOptions
 import ai.platon.scent.ql.h2.context.ScentSQLContexts
 import com.google.gson.GsonBuilder
-import kotlinx.coroutines.runBlocking
 import org.springframework.boot.builder.SpringApplicationBuilder
 import java.sql.ResultSet
 import kotlin.system.exitProcess

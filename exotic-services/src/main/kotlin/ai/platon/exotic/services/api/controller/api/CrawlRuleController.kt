@@ -10,8 +10,6 @@ import ai.platon.exotic.services.api.persist.CrawlRuleRepository
 import ai.platon.pulsar.common.LinkExtractors
 import ai.platon.pulsar.common.ResourceLoader
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.web.context.WebServerApplicationContext
-import org.springframework.boot.web.server.WebServer
 import org.springframework.core.env.Environment
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
@@ -20,7 +18,6 @@ import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.*
-import org.springframework.web.server.adapter.WebHttpHandlerBuilder.applicationContext
 import java.time.Duration
 import java.time.Instant
 import java.util.stream.Collectors
