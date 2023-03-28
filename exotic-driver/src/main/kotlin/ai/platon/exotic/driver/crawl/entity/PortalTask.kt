@@ -7,13 +7,17 @@ import com.fasterxml.jackson.annotation.ObjectIdGenerators
 import org.apache.commons.lang3.StringUtils
 import org.springframework.data.annotation.CreatedDate
 import org.springframework.data.annotation.LastModifiedDate
+import org.springframework.data.domain.PageRequest
 import org.springframework.data.jpa.domain.support.AuditingEntityListener
+import org.springframework.data.repository.query.Param
 import java.time.Instant
 import javax.persistence.*
 
 /**
  * A portal task is a task start with a portal url
  * */
+
+
 @Table(name = "portal_tasks")
 @Entity
 @EntityListeners(AuditingEntityListener::class)
@@ -31,6 +35,7 @@ class PortalTask(
     var id: Long? = null
 
     @JsonIdentityReference(alwaysAsId = true)
+//    @ManyToOne(fetch = FetchType.LAZY)
     @ManyToOne
     var rule: CrawlRule? = null
 
@@ -60,4 +65,5 @@ class PortalTask(
     var lastModifiedDate: Instant = Instant.now()
 
     val abbreviatedUrl get() = StringUtils.abbreviateMiddle(url, "...", 35)
+
 }

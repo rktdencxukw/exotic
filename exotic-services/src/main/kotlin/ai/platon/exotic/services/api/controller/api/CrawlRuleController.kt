@@ -60,22 +60,22 @@ from load_and_select('{{url}}', 'body');
 
     @GetMapping("/")
     fun list(
-        @RequestParam(defaultValue = "0") pageNumber: Int = 0,
+        @RequestParam(defaultValue = "0") pageNumber: Int = 1,
         @RequestParam(defaultValue = "500") pageSize: Int = 500,
-    ): ResponseEntity<Page<CrawlRule>> {
+    ): ResponseEntity<OhJsonRespBody<Page<CrawlRule>>> {
         val sort = Sort.Direction.DESC
         val sortProperty = "id"
         val pageable = PageRequest.of(pageNumber, pageSize, sort, sortProperty)
         val rsp = repository.findAllByStatusNot(RuleStatus.Archived.toString(), pageable)
-        return ResponseEntity.ok(rsp)
+        return ResponseEntity.ok(OhJsonRespBody(rsp))
     }
 
     @GetMapping("/view/{id}")
-    fun view(@PathVariable id: Long): ResponseEntity<CrawlRule> {
+    fun view(@PathVariable id: Long): ResponseEntity<OhJsonRespBody<CrawlRule>> {
         val rule = repository.getById(id)
         // TODO 分页
-        rule.portalTasks.sortedByDescending { it.id }
-        return ResponseEntity.ok(rule)
+//        rule.portalTasks.sortedByDescending { it.id }
+        return ResponseEntity.ok(OhJsonRespBody(rule))
     }
 
 //    @GetMapping("/add")
@@ -270,7 +270,7 @@ from load_and_select('{{url}}', 'body');
 
 //    @GetMapping("admin/")
 //    fun adminList(
-//        @RequestParam(defaultValue = "0") pageNumber: Int = 0,
+//        @RequestParam(defaultValue = "0") pageNumber: Int = 1,
 //        @RequestParam(defaultValue = "500") pageSize: Int = 500,
 //    ): String {
 //        val sort = Sort.Direction.DESC
