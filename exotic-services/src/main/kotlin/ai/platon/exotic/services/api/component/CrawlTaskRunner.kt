@@ -200,7 +200,7 @@ class CrawlTaskRunner(
                 if (resultSet.isNullOrEmpty()) {
                     logger.warn("No result set | {}", it.configuredUrl)
                 } else {
-                    var ids: Array<String>? = resultSet[0]["ids"] as Array<String>?
+                    var ids = resultSet[0]["ids"] as ArrayList<String>?
                     if (ids.isNullOrEmpty()) {
                         logger.warn("No ids in task #{} | {}", portalTask.id, it.configuredUrl)
                     } else {

@@ -105,16 +105,16 @@ open class OutPageScraper(
                 if (resultSet.isNullOrEmpty()) {
                     logger.warn("No result set | {}", it.task.configuredUrl)
                 } else {
-                    var ids: Array<String>? = resultSet[0]["ids"] as Array<String>?
+                    var ids = resultSet[0]["ids"] as ArrayList<String>?
                     if (ids.isNullOrEmpty()) {
                         logger.warn("No ids in task #{} | {}", task.id, it.task.configuredUrl)
                     } else {
-                        var titles = resultSet[0]["titles"] as Array<String>
-                        var contents = resultSet[0]["contents"] as Array<String>
-                        val oldSet: List<String> = rule.idsOfLast.split(",").map{it.trim()}
-                        for (i in ids.indices) {
+                        var titles = resultSet[0]["titles"] as ArrayList<String>
+                        var contents = resultSet[0]["contents"] as ArrayList<String>
+                        val oldSet : Set<String> = rule.idsOfLast.split(",").map{it.trim()}.toSet()
+                        for (i in ids.size - 1 downTo 0) {
                             if (rule.idsOfLast.isNullOrEmpty() || !oldSet.contains(ids[i])) {
-
+                                // TODO 通知界面端 websocket
                                 var msg = WeChatMarkdownMsg(titles[i], contents[i])
                                 var gson = Gson()
                                 val request = HttpRequest.newBuilder()
