@@ -2,9 +2,11 @@ package ai.platon.exotic.services.api.controller.api
 
 //import ai.platon.exotic.services.common.jackson.scentObjectMapper
 import ai.platon.exotic.driver.crawl.ExoticCrawler
+import ai.platon.exotic.services.api.controller.response.OhJsonRespBody
 import ai.platon.exotic.services.api.entity.api.ExpandedScrapeResponse
 import ai.platon.pulsar.driver.ScrapeResponse
 import org.springframework.data.domain.PageRequest
+import org.springframework.data.mongodb.core.MongoTemplate
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
@@ -26,6 +28,7 @@ class RemoteTaskController(
         @RequestParam(defaultValue = "500") pageSize: Int = 500,
         @RequestParam(defaultValue = "desc") direction: String = "desc",
     ): ResponseEntity<List<ExpandedScrapeResponse>> {
+        throw UnsupportedOperationException("Not implemented yet")
         val ascPageNumber = if (direction == "desc") {
             val count = driver.count()
             val totalPageNumber = 1 + count / pageSize
@@ -63,8 +66,12 @@ class RemoteTaskController(
 //    }
 
     @GetMapping("/view/{id}")
-    fun view(@PathVariable id: String): ResponseEntity<ScrapeResponse> {
+    fun view(@PathVariable id: String): ResponseEntity<OhJsonRespBody<ScrapeResponse>> {
         val task = driver.findById(id)
-        return ResponseEntity.ok(task)
+        return if (task != null){
+            ResponseEntity.ok(OhJsonRespBody(task))
+        } else {
+            ResponseEntity.notFound().build()
+        }
     }
 }

@@ -13,6 +13,7 @@ import org.springframework.context.annotation.Bean
 import org.springframework.core.env.Environment
 import org.springframework.core.env.get
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing
+import org.springframework.data.mongodb.core.MongoTemplate
 import org.springframework.web.servlet.config.annotation.CorsRegistry
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
 import org.thymeleaf.templateresolver.FileTemplateResolver
@@ -30,7 +31,8 @@ import javax.annotation.PostConstruct
 class ExoticApplication(
     val applicationContext: ApplicationContext,
     val defaultThymeleafTemplateResolver: ITemplateResolver,
-    val env: Environment
+    val env: Environment,
+    val mongoTemplate: MongoTemplate
 ) {
     private val logger = getLogger(this)
 
@@ -84,6 +86,6 @@ class ExoticApplication(
 
     @Bean(destroyMethod = "close")
     fun exoticCrawler(): ExoticCrawler {
-        return ExoticCrawler(env)
+        return ExoticCrawler(env, mongoTemplate)
     }
 }

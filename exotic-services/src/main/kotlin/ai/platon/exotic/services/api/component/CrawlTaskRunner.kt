@@ -197,17 +197,16 @@ class CrawlTaskRunner(
                 processingRules.remove(portalTask.rule!!.id)
 
                 val resultSet = it.response.resultSet
-                if (resultSet == null || resultSet.isEmpty()) {
+                if (resultSet.isNullOrEmpty()) {
                     logger.warn("No result set | {}", it.configuredUrl)
                 } else {
-                    var ids = resultSet[0]["ids"]?.toString()
-                    if (ids.isNullOrBlank()) {
+                    var ids: Array<String>? = resultSet[0]["ids"] as Array<String>?
+                    if (ids.isNullOrEmpty()) {
                         logger.warn("No ids in task #{} | {}", portalTask.id, it.configuredUrl)
                     } else {
-                        ids = ids.removePrefix("(").removeSuffix(")")
                         // TODO: normalization
                         val rule = portalTask.rule
-                        rule!!.idsOfLast = ids
+                        rule!!.idsOfLast = ids.joinToString(",")
                         crawlRuleRepository.save(rule)
                         crawlRuleRepository.flush()
                     }

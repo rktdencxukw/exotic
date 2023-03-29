@@ -20,6 +20,8 @@ import org.springframework.web.bind.annotation.*
 import java.time.Instant
 import java.util.stream.Collectors
 import javax.validation.Valid
+import kotlin.Nothing
+import kotlin.Nothing as No
 
 // FIXME 要返回模板路径，这样改已经不适用。
 
@@ -137,41 +139,42 @@ from load_and_select('{{url}}', 'body');
                 .collect(Collectors.joining(","))
             return ResponseEntity.badRequest().body(OhJsonRespBody.error(msg))
         }
+        throw NotImplementedError()
         // TODO not retry
-        var portalTask = PortalTask(rule.portalUrls, "", 3)
-        var scrapeTask = ScrapeTask(rule.portalUrls, "", 3, rule.sqlTemplate!!)
-        scrapeTask.companionPortalTask = portalTask
-
-        val listenableScrapeTask = ListenableScrapeTask(scrapeTask).also {
-            it.onSubmitted = {
-                it.task.status = TaskStatus.SUBMITTED
-            }
-            it.onRetry = {
-                it.task.status = TaskStatus.RETRYING
-            }
-            it.onSuccess = {
-                it.task.status = TaskStatus.OK
-            }
-            it.onFailed = {
-                it.task.status = TaskStatus.FAILED
-            }
-            it.onFinished = {
-                it.task.status = TaskStatus.OK
-            }
-            it.onTimeout = {
-                it.task.status = TaskStatus.FAILED
-            }
-        }
-
-        val taskSubmitter = TaskSubmitter(exoticCrawler.driverSettings)
-        taskSubmitter.scrape(listenableScrapeTask)
-
-        while (scrapeTask.status != TaskStatus.OK || scrapeTask.status != TaskStatus.FAILED) {
-            // sleep 1s
-            Thread.sleep(1000)
-        }
-
-        return ResponseEntity.ok(OhJsonRespBody.ok(scrapeTask))
+//        var portalTask = PortalTask(rule.portalUrls, "", 3)
+//        var scrapeTask = ScrapeTask(rule.portalUrls, "", 3, rule.sqlTemplate!!)
+//        scrapeTask.companionPortalTask = portalTask
+//
+//        val listenableScrapeTask = ListenableScrapeTask(scrapeTask).also {
+//            it.onSubmitted = {
+//                it.task.status = TaskStatus.SUBMITTED
+//            }
+//            it.onRetry = {
+//                it.task.status = TaskStatus.RETRYING
+//            }
+//            it.onSuccess = {
+//                it.task.status = TaskStatus.OK
+//            }
+//            it.onFailed = {
+//                it.task.status = TaskStatus.FAILED
+//            }
+//            it.onFinished = {
+//                it.task.status = TaskStatus.OK
+//            }
+//            it.onTimeout = {
+//                it.task.status = TaskStatus.FAILED
+//            }
+//        }
+//
+//        val taskSubmitter = TaskSubmitter(exoticCrawler.driverSettings)
+//        taskSubmitter.scrape(listenableScrapeTask)
+//
+//        while (scrapeTask.status != TaskStatus.OK || scrapeTask.status != TaskStatus.FAILED) {
+//            // sleep 1s
+//            Thread.sleep(1000)
+//        }
+//
+//        return ResponseEntity.ok(OhJsonRespBody.ok(scrapeTask))
     }
 
 //    @GetMapping("/edit/{id}")

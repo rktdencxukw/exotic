@@ -12,6 +12,7 @@ import com.google.gson.Gson
 import org.apache.commons.lang3.RandomStringUtils
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.data.mongodb.core.MongoTemplate
 import java.time.Duration
 import java.time.Instant
 import java.time.temporal.ChronoUnit
@@ -22,12 +23,13 @@ import kotlin.random.Random
 
 open class TaskSubmitter(
     private val driverSettings: DriverSettings,
-    private val reportServer: String = "",
+    private val reportServer: String,
     private val autoCollect: Boolean = true,
+    private val mongoTemplate: MongoTemplate,
 ) : AutoCloseable {
     var logger: Logger = LoggerFactory.getLogger(TaskSubmitter::class.java)
     private var dryRun = System.getProperty("scrape.submitter.dry.run") == "true"
-    var driver = Driver(driverSettings.scrapeServer, driverSettings.authToken, reportServer)
+    var driver = Driver(driverSettings.scrapeServer, driverSettings.authToken, reportServer, mongoTemplate)
 
     private val pendingTasks: MutableMap<String, ListenableScrapeTask> = ConcurrentSkipListMap()
     private val retryingTaskIds: ConcurrentSkipListSet<String> = ConcurrentSkipListSet()
@@ -104,7 +106,12 @@ open class TaskSubmitter(
 //                driver.submit(sql, task.priority, false)
                 driver.submitWithProcess(sql) {
                     listenableTask.task.response = it
+//                    if (it.)
+                    // TODO should judge the status code
+                    listenableTask.onSuccess()
                     listenableTask.onFinished()
+                    // TODO 处理retry
+                    pendingTasks.remove(listenableTask.task.serverTaskId)
                     return@submitWithProcess 0u
                 }
             }

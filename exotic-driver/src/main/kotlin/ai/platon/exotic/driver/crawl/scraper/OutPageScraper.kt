@@ -12,6 +12,7 @@ import com.google.gson.Gson
 import com.google.gson.annotations.SerializedName
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.data.mongodb.core.MongoTemplate
 import java.net.URI
 import java.net.http.HttpClient
 import java.net.http.HttpRequest
@@ -37,14 +38,16 @@ class WeChatMarkdownMsg(val title: String, val content: String){
 }
 
 open class OutPageScraper(
-    val driverSettings: DriverSettings
+    val driverSettings: DriverSettings,
+    val reportServer: String,
+    mongoTemplate: MongoTemplate
 ) : AutoCloseable {
     var logger: Logger = LoggerFactory.getLogger(OutPageScraper::class.java)
 
     val httpTimeout: Duration = Duration.ofMinutes(3)
     val hc = HttpClient.newHttpClient()
 
-    val taskSubmitter: TaskSubmitter = TaskSubmitter(driverSettings)
+    val taskSubmitter: TaskSubmitter = TaskSubmitter(driverSettings, reportServer, true, mongoTemplate)
 
     fun scrape(sql: String) {
         val a = """
@@ -92,33 +95,27 @@ open class OutPageScraper(
         val scrapeTask = ScrapeTask(task.url, args, priority, sqlTemplate!!)
         scrapeTask.companionPortalTask = task
 
-        val listenableScrapeTask = ListenableScrapeTask(scrapeTask).also {
+        val listenableScrapeTask = ListenableScrapeTask(scrapeTask).also { it ->
             it.task.companionPortalTask = task
             it.onSubmitted = { listenablePortalTask.onSubmitted(it.task) }
             it.onRetry = { listenablePortalTask.onRetry(it.task) }
             it.onSuccess = {
 
                 val resultSet = it.task.response.resultSet
-                if (resultSet == null || resultSet.isEmpty()) {
+                if (resultSet.isNullOrEmpty()) {
                     logger.warn("No result set | {}", it.task.configuredUrl)
                 } else {
-                    var ids = resultSet[0]["ids"]?.toString()
-                    if (ids.isNullOrBlank()) {
+                    var ids: Array<String>? = resultSet[0]["ids"] as Array<String>?
+                    if (ids.isNullOrEmpty()) {
                         logger.warn("No ids in task #{} | {}", task.id, it.task.configuredUrl)
                     } else {
-                        ids = ids.removePrefix("(").removeSuffix(")")
-                        // TODO: normalization
-                        val idsArr = ids.split(",").asSequence().map { it.trim() }.toList().toTypedArray()
-
-                        var titles = resultSet[0]["titles"]?.toString()
-                        val titlesArr = titles!!.split(",").asSequence().map { it.trim() }.toList().toTypedArray()
-                        var contents = resultSet[0]["contents"]?.toString()
-                        val contentsArr = contents!!.split(",").asSequence().map { it.trim() }.toList().toTypedArray()
+                        var titles = resultSet[0]["titles"] as Array<String>
+                        var contents = resultSet[0]["contents"] as Array<String>
                         val oldSet: List<String> = rule.idsOfLast.split(",").map{it.trim()}
-                        for (i in idsArr.indices) {
-                            if (rule.idsOfLast.isNullOrEmpty() || !oldSet.contains(idsArr[i])) {
+                        for (i in ids.indices) {
+                            if (rule.idsOfLast.isNullOrEmpty() || !oldSet.contains(ids[i])) {
 
-                                var msg = WeChatMarkdownMsg(titlesArr[i], contentsArr[i])
+                                var msg = WeChatMarkdownMsg(titles[i], contents[i])
                                 var gson = Gson()
                                 val request = HttpRequest.newBuilder()
                                     .uri(URI.create("https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=5932e314-7ffe-47bd-a097-87e9a39af354"))

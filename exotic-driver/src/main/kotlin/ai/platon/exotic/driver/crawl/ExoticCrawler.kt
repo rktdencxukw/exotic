@@ -6,12 +6,14 @@ import ai.platon.exotic.driver.crawl.scraper.*
 import ai.platon.pulsar.common.config.Params
 import ai.platon.pulsar.driver.DriverSettings
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.core.env.Environment
+import org.springframework.data.mongodb.core.MongoTemplate
 import java.util.*
 import java.util.concurrent.ConcurrentLinkedDeque
 import java.util.concurrent.ConcurrentLinkedQueue
 
-class ExoticCrawler(val env: Environment? = null): AutoCloseable {
+class ExoticCrawler(val env: Environment? = null, val mongoTemplate: MongoTemplate): AutoCloseable {
     private val logger = LoggerFactory.getLogger(ExoticCrawler::class.java)
 
     val scrapeServer: String
@@ -31,6 +33,8 @@ class ExoticCrawler(val env: Environment? = null): AutoCloseable {
             ?: System.getProperty("scrape.authToken")
             ?: "b06test42c13cb000f74539b20be9550b8a1a90b9"
 
+    private val reportServer = "http://127.0.0.1:${env!!.getProperty("server.port")}${env!!.getProperty("server.servlet.context-path")}"
+
     val driverSettings get() = DriverSettings(
         scrapeServer,
         authToken,
@@ -38,7 +42,7 @@ class ExoticCrawler(val env: Environment? = null): AutoCloseable {
         scrapeServerContextPath
     )
 
-    val outPageScraper = OutPageScraper(driverSettings)
+    val outPageScraper = OutPageScraper(driverSettings, reportServer, mongoTemplate)
 
     val driver get() = outPageScraper.taskSubmitter.driver
 
@@ -122,7 +126,9 @@ class ExoticCrawler(val env: Environment? = null): AutoCloseable {
 }
 
 fun main() {
-    val scraper = ExoticCrawler()
+    lateinit var mongoTemplate : MongoTemplate
+
+    val scraper = ExoticCrawler(mongoTemplate = mongoTemplate)
     scraper.crawl()
 
     readLine()

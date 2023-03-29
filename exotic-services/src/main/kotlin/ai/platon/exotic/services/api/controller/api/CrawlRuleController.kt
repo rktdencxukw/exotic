@@ -176,7 +176,7 @@ from load_and_select('{{url}}', 'body');
             }
         }
 
-        val taskSubmitter = TaskSubmitter(exoticCrawler.driverSettings, reportServer)
+        val taskSubmitter = TaskSubmitter(exoticCrawler.driverSettings, reportServer, mongoTemplate = exoticCrawler.mongoTemplate)
         taskSubmitter.scrape(listenableScrapeTask)
 
         val startTime = Instant.now()
