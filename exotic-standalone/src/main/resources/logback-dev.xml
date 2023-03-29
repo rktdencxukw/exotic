@@ -230,7 +230,8 @@
         <appender-ref ref="Console"/>
     </logger>
 <!--    <logger name="ai.platon.exotic.driver" level="INFO">-->
-<!--        <appender-ref ref="Console"/>-->
+<!--        <appender-ref ref="Console"/> -->
+<!--    duplicated-->
 <!--    </logger>-->
 
     <logger name="ch.qos.logback.classic" level="WARN"/>
