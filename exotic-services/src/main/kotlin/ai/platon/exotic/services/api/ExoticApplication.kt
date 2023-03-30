@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.autoconfigure.domain.EntityScan
+import org.springframework.boot.autoconfigure.jackson.Jackson2ObjectMapperBuilderCustomizer
 import org.springframework.boot.autoconfigure.thymeleaf.ThymeleafProperties
 import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.Bean
@@ -14,12 +15,14 @@ import org.springframework.core.env.Environment
 import org.springframework.core.env.get
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing
 import org.springframework.data.mongodb.core.MongoTemplate
+import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder
 import org.springframework.web.servlet.config.annotation.CorsRegistry
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
 import org.thymeleaf.templateresolver.FileTemplateResolver
 import org.thymeleaf.templateresolver.ITemplateResolver
 import java.nio.file.Files
 import java.nio.file.Paths
+import java.util.*
 import javax.annotation.PostConstruct
 
 @SpringBootApplication
@@ -47,6 +50,14 @@ class ExoticApplication(
         logger.info("Database url: {}", env["spring.datasource.url"])
     }
 
+//    @Bean
+//    fun jacksonObjectMapperCustomization(): Jackson2ObjectMapperBuilderCustomizer? {
+//        return Jackson2ObjectMapperBuilderCustomizer { jacksonObjectMapperBuilder: Jackson2ObjectMapperBuilder ->
+//            jacksonObjectMapperBuilder.timeZone(
+//                TimeZone.getDefault()
+//            )
+//        }
+//    }
     @Bean
     fun CORSConfigurer(): WebMvcConfigurer? {
         return object : WebMvcConfigurer {

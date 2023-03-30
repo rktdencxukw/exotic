@@ -2,15 +2,23 @@ package ai.platon.exotic.services.api.component
 
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.databind.DeserializationFeature
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.databind.module.SimpleModule
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import com.fasterxml.jackson.datatype.jsr310.deser.InstantDeserializer
+import com.fasterxml.jackson.datatype.jsr310.ser.InstantSerializer
+import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.converter.HttpMessageConverter
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
+import java.text.SimpleDateFormat
+import java.time.Instant
+import java.time.format.DateTimeFormatter
 import java.util.*
 
 
+// https://www.cnblogs.com/yucongblog/p/14107555.html
 /**
  * @Description 解决springboot高版本下日期转json时jackson方式不生效问题
  *
@@ -19,28 +27,30 @@ import java.util.*
  */
 @Configuration
 public class DateFormatForJson : WebMvcConfigurer {
-    /**
-     * 使用此方法, 以下 spring-boot: jackson时间格式化 配置 将会失效
-     * spring.jackson.time-zone=GMT+8
-     * spring.jackson.date-format=yyyy-MM-dd HH:mm:ss
-     * 原因: 会覆盖 @EnableAutoConfiguration 关于 WebMvcAutoConfiguration 的配置
-     * */
-    override fun extendMessageConverters(converters: MutableList<HttpMessageConverter<*>>) {
-        var converter = MappingJackson2HttpMessageConverter();
-        var objectMapper = converter.objectMapper;
-        // 生成JSON时,将所有Long转换成String
-//        var simpleModule = SimpleModule();
-//        objectMapper.registerModule(simpleModule);
-        // 时间格式化
-        objectMapper.setDefaultPropertyInclusion(JsonInclude.Include.NON_NULL)
-        objectMapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
-        objectMapper.configure(SerializationFeature.INDENT_OUTPUT, true);
-        objectMapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
-//        objectMapper.setDateFormat(SimpleDateFormat("yyyy-MM-ddTHH:mm:ss.SSS[Z]"));
-        objectMapper.setTimeZone(TimeZone.getTimeZone("GMT+8"));
-
-        // 设置格式化内容
-        converter.objectMapper = objectMapper;
-        converters.add(0, converter);
+    @Bean
+    fun jackson2HttpMessageConverter(): MappingJackson2HttpMessageConverter? {
+        val converter = MappingJackson2HttpMessageConverter()
+        val mapper = ObjectMapper()
+        val jm = JavaTimeModule()
+        jm.addSerializer(Instant::class.java, MyInstantSerializer())
+        jm.addDeserializer(Instant::class.java, MyInstantDeserializer())
+        mapper.registerModule(jm)
+        mapper.setDefaultPropertyInclusion(JsonInclude.Include.NON_NULL)
+        mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
+        mapper.configure(SerializationFeature.INDENT_OUTPUT, true);
+        mapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
+        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+        mapper.setTimeZone(TimeZone.getTimeZone("GMT+8:00"))
+        mapper.dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS")
+        converter.objectMapper = mapper
+        return converter
+    }
+    override fun configureMessageConverters(converters: MutableList<HttpMessageConverter<*>?>) {
+        converters.add(jackson2HttpMessageConverter())
     }
 }
+
+private class MyInstantSerializer
+    : InstantSerializer(InstantSerializer.INSTANCE, false, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS").withZone(TimeZone.getTimeZone("GMT+8:00").toZoneId()))
+private class MyInstantDeserializer
+    : InstantDeserializer<Instant>(InstantDeserializer.INSTANT, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS").withZone(TimeZone.getTimeZone("GMT+8:00").toZoneId()))

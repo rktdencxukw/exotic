@@ -42,10 +42,10 @@ import org.springframework.scheduling.annotation.EnableScheduling
 @EnableJpaAuditing
 
 class StandaloneApplication {
-
 }
 
 fun main(argv: Array<String>) {
+//    TimeZone.setDefault(TimeZone.getTimeZone("GTM+8:00"))
     ExoticUtils.prepareDatabaseOrFail()
 //    System.setProperty("scrape.submitter.dry.run", "true")
     SpringApplicationBuilder(StandaloneApplication::class.java)
