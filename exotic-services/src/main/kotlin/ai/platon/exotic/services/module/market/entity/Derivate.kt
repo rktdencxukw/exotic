@@ -1,4 +1,4 @@
-package ai.platon.exotic.driver.crawl.entity
+package ai.platon.exotic.services.module.market.entity
 
 import ai.platon.exotic.driver.crawl.scraper.TaskStatus
 import com.fasterxml.jackson.annotation.JsonIdentityInfo
@@ -18,54 +18,37 @@ import javax.persistence.*
  * */
 
 
-@Table(name = "portal_tasks")
+@Table(name = "market_derivates")
 @Entity
 @EntityListeners(AuditingEntityListener::class)
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator::class, property = "id")
-class PortalTask(
-    var url: String,
-
-    var args: String = "",
-
-    var priority: Int = 0,
+class Derivate(
 ) {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
     var id: Long? = null
 
-    @JsonIdentityReference(alwaysAsId = true)
-//    @ManyToOne(fetch = FetchType.LAZY)
-    @ManyToOne
-    var rule: CrawlRule? = null
-
     /**
      * The server side id
      * */
-    var serverTaskId: String = ""
+    var symbol: String = ""
 
-    var submittedCount: Int = 0
+    var base: String = ""
 
-    var successCount: Int = 0
+    var target: String = ""
 
-    var resultCount: Int = 0
+    var contractType: String = ""
 
-    var retryCount: Int = 0
+    var h24Volume: Double = 0.0
 
-    var failedCount: Int = 0
+    var exchangeCgId: String = ""
 
-    var finishedCount: Int = 0
-
-    var startTime: Instant = Instant.now()
-
-    var status: TaskStatus = TaskStatus.CREATED
+    var link: String = ""
 
     @CreatedDate
     var createdDate: Instant = Instant.now()
 
     @LastModifiedDate
     var lastModifiedDate: Instant = Instant.now()
-
-    val abbreviatedUrl get() = StringUtils.abbreviateMiddle(url, "...", 35)
-
 }

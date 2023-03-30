@@ -5,6 +5,7 @@ import ai.platon.exotic.driver.common.IS_DEVELOPMENT
 import ai.platon.exotic.driver.common.PRODUCT_MAX_OUT_PAGES
 import ai.platon.exotic.driver.crawl.entity.CrawlRule
 import ai.platon.exotic.driver.crawl.entity.PortalTask
+import ai.platon.exotic.driver.crawl.entity.ResultItem
 import ai.platon.pulsar.common.DateTimes
 import ai.platon.pulsar.common.urls.UrlUtils
 import ai.platon.pulsar.driver.DriverSettings
@@ -23,12 +24,13 @@ import java.time.Duration
 class Markdown(val content: String) {
 }
 
-class WeChatMarkdownMsg(val title: String, val content: String){
+class WeChatMarkdownMsg(val title: String, val content: String) {
     @SerializedName("msgtype")
     val msgType = "markdown"
     lateinit var markdown: Markdown
+
     init {
-       val content = """
+        val content = """
            ${DateTimes.now()}\n
            title: ${title}\n\n
            content: $content
@@ -40,7 +42,7 @@ class WeChatMarkdownMsg(val title: String, val content: String){
 open class OutPageScraper(
     val driverSettings: DriverSettings,
     val reportServer: String,
-    mongoTemplate: MongoTemplate
+    private val mongoTemplate: MongoTemplate
 ) : AutoCloseable {
     var logger: Logger = LoggerFactory.getLogger(OutPageScraper::class.java)
 
@@ -111,22 +113,26 @@ open class OutPageScraper(
                     } else {
                         var titles = resultSet[0]["titles"] as ArrayList<String>
                         var contents = resultSet[0]["contents"] as ArrayList<String>
-                        val oldSet : Set<String> = rule.idsOfLast.split(",").map{it.trim()}.toSet()
-                        for (i in ids.size - 1 downTo 0) {
-                            if (rule.idsOfLast.isNullOrEmpty() || !oldSet.contains(ids[i])) {
-                                // TODO 通知界面端 websocket
-                                var msg = WeChatMarkdownMsg(titles[i], contents[i])
-                                var gson = Gson()
-                                val request = HttpRequest.newBuilder()
-                                    .uri(URI.create("https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=5932e314-7ffe-47bd-a097-87e9a39af354"))
-                                    .header("Content-Type", "application/json")
-                                    .POST(BodyPublishers.ofString(gson.toJson(msg))).build()
-                                hc.send(request, BodyHandlers.ofString())
-                                // val response = hc.send(request, BodyHandlers.ofString()).body()
-
+                        val oldSet: Set<String> = rule.idsOfLast.split(",").map { it.trim() }.toSet()
+                        var resultCount = 0
+                        for (i in ids.indices) {
+                            if (oldSet.contains(ids[i])) {
+                                break
                             }
+                            ++resultCount
+                            val resultItem = ResultItem(task.rule!!.id!!, task.id!!, ids[i], titles[i], contents[i])
+                            mongoTemplate.save(resultItem)
+                            // TODO 通知界面端 websocket
+                            var msg = WeChatMarkdownMsg(titles[i], contents[i])
+                            var gson = Gson()
+                            val request = HttpRequest.newBuilder()
+                                .uri(URI.create("https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=5932e314-7ffe-47bd-a097-87e9a39af354"))
+                                .header("Content-Type", "application/json")
+                                .POST(BodyPublishers.ofString(gson.toJson(msg))).build()
+                            hc.send(request, BodyHandlers.ofString())
+                            // val response = hc.send(request, BodyHandlers.ofString()).body()
                         }
-
+                        it.task.companionPortalTask!!.resultCount = resultCount
                     }
                 }
 

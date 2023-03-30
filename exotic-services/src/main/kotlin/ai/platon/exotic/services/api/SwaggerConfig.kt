@@ -1,27 +1,18 @@
 package ai.platon.exotic.services.api
 
 import com.fasterxml.classmate.TypeResolver
-import com.google.common.collect.ImmutableMap
-import org.apache.avro.SchemaBuilder
-import org.apache.commons.lang3.reflect.TypeUtils
-import org.springframework.boot.autoconfigure.data.web.SpringDataWebProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.core.Ordered
 import org.springframework.data.domain.Pageable
 import org.springframework.data.rest.core.config.RepositoryRestConfiguration
 import org.springframework.data.rest.webmvc.config.RepositoryRestConfigurer
+import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.servlet.config.annotation.CorsRegistry
 import springfox.documentation.builders.*
-import springfox.documentation.schema.AlternateTypeRule
-import springfox.documentation.schema.AlternateTypeRuleConvention
-import springfox.documentation.schema.AlternateTypeRules.newRule
 import springfox.documentation.service.ApiInfo
 import springfox.documentation.spi.DocumentationType
 import springfox.documentation.spring.web.plugins.Docket
 import springfox.documentation.swagger2.annotations.EnableSwagger2
-import java.lang.reflect.Type
-import java.util.*
 
 
 /*
@@ -46,9 +37,14 @@ public class SwaggerConfig {
     @Bean
 //    fun documentation(pageableConvention: AlternateTypeRuleConvention ): Docket {
     fun documentation(resolver: TypeResolver): Docket {
+        val annotationPred = RequestHandlerSelectors.withClassAnnotation(RestController::class.java)
+        val p1 = RequestHandlerSelectors.basePackage("ai.platon.exotic.services.api.controller.api").and(annotationPred)
+        val p2 = RequestHandlerSelectors.basePackage("ai.platon.exotic.services.module").and(annotationPred)
+        val predicate = RequestHandlerSelectors.none().or(p1).or(p2)
         return Docket(DocumentationType.SWAGGER_2)
             .select()
-            .apis(RequestHandlerSelectors.basePackage("ai.platon.exotic.services.api.controller.api"))
+//            .apis(RequestHandlerSelectors.basePackage("ai.platon.exotic.services.api.controller.api"))
+            .apis(predicate)
             .paths(PathSelectors.any())
             .build()
             .pathMapping("/")

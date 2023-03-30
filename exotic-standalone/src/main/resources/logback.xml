@@ -241,9 +241,9 @@
     <logger name="ai.platon.exotic" level="INFO">
         <appender-ref ref="Console"/>
     </logger>
-    <logger name="ai.platon.exotic.driver" level="INFO">
-        <appender-ref ref="Console"/>
-    </logger>
+<!--    <logger name="ai.platon.exotic.driver" level="INFO">-->
+<!--        <appender-ref ref="Console"/>-->
+<!--    </logger>-->
 
     <logger name="ch.qos.logback.classic" level="WARN"/>
 

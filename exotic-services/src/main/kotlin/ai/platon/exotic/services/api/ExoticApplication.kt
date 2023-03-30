@@ -29,7 +29,7 @@ import javax.annotation.PostConstruct
 @EnableJpaAuditing
 @EntityScan(
     "ai.platon.exotic.driver.crawl.entity",
-    "ai.platon.exotic.services.api.entity"
+    "ai.platon.exotic.services.api.entity",
 )
 class ExoticApplication(
     val applicationContext: ApplicationContext,

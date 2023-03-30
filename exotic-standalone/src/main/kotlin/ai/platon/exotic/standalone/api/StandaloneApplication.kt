@@ -12,6 +12,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories
 import org.springframework.data.mongodb.repository.config.EnableMongoRepositories
 import org.springframework.scheduling.annotation.EnableScheduling
+import java.util.*
 
 
 @SpringBootApplication(
@@ -19,6 +20,7 @@ import org.springframework.scheduling.annotation.EnableScheduling
         "ai.platon.scent.boot.autoconfigure",
         "ai.platon.scent.rest.api",
         "ai.platon.exotic.services.api",
+        "ai.platon.exotic.services.module",
         "ai.platon.pulsar.driver.report"
     ],
     exclude = [EmbeddedMongoAutoConfiguration::class]
@@ -28,13 +30,16 @@ import org.springframework.scheduling.annotation.EnableScheduling
     "ai.platon.exotic.services.api",
     "ai.platon.exotic.standalone.api",
     "ai.platon.pulsar.driver.report", // 扫描 driver中http report controller
+    "ai.platon.exotic.services.module",
 )
 @EntityScan(
     "ai.platon.exotic.driver.crawl.entity",
     "ai.platon.exotic.services.entity",
+    "ai.platon.exotic.services.module.market.entity",
+    "ai.platon.exotic.services.module.trade.entity"
 )
 @ImportResource("classpath:config/app/app-beans/app-context.xml")
-@EnableJpaRepositories("ai.platon.exotic.services.api.persist")
+@EnableJpaRepositories(basePackages = ["ai.platon.exotic.services.api.persist", "ai.platon.exotic.services.module.market.persist", "ai.platon.exotic.services.module.trade.persist"])
 @EnableMongoRepositories("ai.platon.scent.boot.autoconfigure.persist")
 // failed to import Applications
 //@Import(ExoticApplication::class, ExoticServerApplication::class)

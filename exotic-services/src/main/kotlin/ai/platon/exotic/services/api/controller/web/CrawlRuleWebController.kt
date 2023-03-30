@@ -18,6 +18,7 @@ import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.*
 import java.time.Instant
+import java.util.*
 import java.util.stream.Collectors
 import javax.validation.Valid
 import kotlin.Nothing
@@ -61,9 +62,10 @@ from load_and_select('{{url}}', 'body');
 
     @GetMapping("/view/{id}")
     fun view(@PathVariable id: Long): CrawlRule {
+        throw UnsupportedOperationException("Not implemented yet")
         val rule = repository.getById(id)
         // TODO 分页
-        rule.portalTasks.sortedByDescending { it.id }
+//        rule.portalTasks.sortedByDescending { it.id }
         return ResponseEntity.ok(rule).body!!
     }
 
