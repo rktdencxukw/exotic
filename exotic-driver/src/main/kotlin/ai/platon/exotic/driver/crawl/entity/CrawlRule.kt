@@ -122,8 +122,8 @@ class CrawlRule {
     // TODO 延迟加载，分页
     //    @OneToMany(fetch = FetchType.LAZY)
 //    @OneToMany(mappedBy = "rule", fetch = FetchType.EAGER, cascade = [CascadeType.ALL])
-    @OneToMany(mappedBy = "rule", fetch = FetchType.LAZY, cascade = [CascadeType.ALL])
-    val portalTasks: MutableList<PortalTask> = mutableListOf()
+//    @OneToMany(mappedBy = "rule", fetch = FetchType.LAZY, cascade = [CascadeType.ALL])
+//    val portalTasks: MutableList<PortalTask> = mutableListOf()
 
     val zoneOffset: ZoneOffset
         get() {
