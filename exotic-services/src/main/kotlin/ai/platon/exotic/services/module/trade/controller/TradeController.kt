@@ -13,6 +13,8 @@ import ai.platon.exotic.services.module.trade.persist.AccountRepository
 import ai.platon.exotic.services.module.trade.persist.BalanceRepository
 import ai.platon.exotic.services.module.trade.persist.PendingOrderRepository
 import ai.platon.exotic.services.module.trade.persist.PositionRepository
+import ai.platon.exotic.services.module.trade.service.TradeService
+import org.openapitools.client.models.AssetDto
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.core.env.Environment
 import org.springframework.data.domain.Page
@@ -22,6 +24,7 @@ import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import javax.annotation.PostConstruct
+import kotlin.streams.toList
 
 
 @CrossOrigin
@@ -38,7 +41,8 @@ class TradeController(
     private val crawlTaskRunner: CrawlTaskRunner,
     private val exoticCrawler: ExoticCrawler,
     @Autowired
-    private val env: Environment
+    private val env: Environment,
+    private val tradeService: TradeService
 ) {
 
     @PostConstruct
@@ -107,4 +111,45 @@ class TradeController(
         }
         return ResponseEntity.ok(OhJsonRespBody(results))
     }
+
+    @PostMapping("/fetch_balances")
+    fun fetchBalances(
+        @RequestParam(defaultValue = "all") accounts: String = "all", // ,分割的账户
+    ): ResponseEntity<OhJsonRespBody<List<Pair<String, String>>>> {
+        var accountList: List<Long> = if (accounts == "all") {
+            accountRepository.findAllByEnable(1).stream().map { it.accountId }.toList()
+        } else {
+            accounts.split(",").map { it.toLong() }
+        }
+        var errMsgList = mutableListOf<Pair<String, String>>()
+        for (accountId in accountList) {
+            val res = tradeService.getBalance(accountId)
+            if (res.ec != 0) {
+                errMsgList.add(Pair(accountId.toString(), res.errmsg))
+            } else {
+                val balanceDto = res.v!!
+                for (b in balanceDto) {
+                    var balance: Balance = convertDtoToEntity(b)
+                    balance.accountId = accountId.toInt()
+                    balanceRepository.save(balance)
+                }
+            }
+        }
+        return if (errMsgList.isEmpty()) {
+            ResponseEntity.ok(OhJsonRespBody())
+        } else {
+            return ResponseEntity.badRequest()
+                .body(OhJsonRespBody<List<Pair<String, String>>>().error("failed", errMsgList))
+        }
+    }
+
+    private fun convertDtoToEntity(dto: AssetDto): Balance {
+        var b = Balance()
+        b.asset = dto.asset!!
+        b.free = dto.free!!
+        b.frozen = dto.frozen!!
+        b.total = dto.total!!
+        return b
+    }
+
 }

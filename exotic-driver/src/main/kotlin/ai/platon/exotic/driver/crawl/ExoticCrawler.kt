@@ -5,15 +5,21 @@ import ai.platon.exotic.driver.crawl.entity.ItemDetail
 import ai.platon.exotic.driver.crawl.scraper.*
 import ai.platon.pulsar.common.config.Params
 import ai.platon.pulsar.driver.DriverSettings
+import com.fasterxml.jackson.databind.ObjectMapper
 import org.slf4j.LoggerFactory
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.core.env.Environment
 import org.springframework.data.mongodb.core.MongoTemplate
+import org.springframework.messaging.simp.SimpMessagingTemplate
 import java.util.*
 import java.util.concurrent.ConcurrentLinkedDeque
 import java.util.concurrent.ConcurrentLinkedQueue
 
-class ExoticCrawler(val env: Environment? = null, val mongoTemplate: MongoTemplate): AutoCloseable {
+class ExoticCrawler(
+    val env: Environment? = null,
+    val mongoTemplate: MongoTemplate,
+    simpMessagingTemplate: SimpMessagingTemplate? = null,
+    ohObjectMapper: ObjectMapper ? = null,
+): AutoCloseable {
     private val logger = LoggerFactory.getLogger(ExoticCrawler::class.java)
 
     val scrapeServer: String
@@ -34,6 +40,8 @@ class ExoticCrawler(val env: Environment? = null, val mongoTemplate: MongoTempla
             ?: "b06test42c13cb000f74539b20be9550b8a1a90b9"
 
     private val reportServer = "http://127.0.0.1:${env!!.getProperty("server.port")}${env!!.getProperty("server.servlet.context-path")}"
+    // TODO 获取局域网地址
+//    private val reportServer = "http://192.168.68.137:${env!!.getProperty("server.port")}${env!!.getProperty("server.servlet.context-path")}"
 
     val driverSettings get() = DriverSettings(
         scrapeServer,
@@ -42,7 +50,7 @@ class ExoticCrawler(val env: Environment? = null, val mongoTemplate: MongoTempla
         scrapeServerContextPath
     )
 
-    val outPageScraper = OutPageScraper(driverSettings, reportServer, mongoTemplate)
+    val outPageScraper = OutPageScraper(driverSettings, reportServer, mongoTemplate, simpMessagingTemplate, ohObjectMapper)
 
     val driver get() = outPageScraper.taskSubmitter.driver
 
@@ -128,7 +136,9 @@ class ExoticCrawler(val env: Environment? = null, val mongoTemplate: MongoTempla
 fun main() {
     lateinit var mongoTemplate : MongoTemplate
 
-    val scraper = ExoticCrawler(mongoTemplate = mongoTemplate)
+    val scraper = ExoticCrawler(
+        mongoTemplate = mongoTemplate,
+    )
     scraper.crawl()
 
     readLine()

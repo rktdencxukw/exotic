@@ -9,17 +9,21 @@ import ai.platon.exotic.driver.crawl.entity.ResultItem
 import ai.platon.pulsar.common.DateTimes
 import ai.platon.pulsar.common.urls.UrlUtils
 import ai.platon.pulsar.driver.DriverSettings
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.google.gson.Gson
 import com.google.gson.annotations.SerializedName
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.data.mongodb.core.MongoTemplate
+import org.springframework.messaging.simp.SimpMessagingTemplate
 import java.net.URI
 import java.net.http.HttpClient
 import java.net.http.HttpRequest
 import java.net.http.HttpRequest.BodyPublishers
 import java.net.http.HttpResponse.BodyHandlers
 import java.time.Duration
+import java.util.*
+import kotlin.collections.ArrayList
 
 class Markdown(val content: String) {
 }
@@ -40,9 +44,11 @@ class WeChatMarkdownMsg(val title: String, val content: String) {
 }
 
 open class OutPageScraper(
-    val driverSettings: DriverSettings,
-    val reportServer: String,
-    private val mongoTemplate: MongoTemplate
+    private val driverSettings: DriverSettings,
+    private val reportServer: String,
+    private val mongoTemplate: MongoTemplate,
+    private val simpMessagingTemplate: SimpMessagingTemplate? = null,
+    private val ohObjectMapper: ObjectMapper? = null,
 ) : AutoCloseable {
     var logger: Logger = LoggerFactory.getLogger(OutPageScraper::class.java)
 
@@ -123,6 +129,7 @@ open class OutPageScraper(
                             val resultItem = ResultItem(task.rule!!.id!!, task.id!!, ids[i], titles[i], contents[i])
                             mongoTemplate.save(resultItem)
                             // TODO 通知界面端 websocket
+                            simpMessagingTemplate!!.convertAndSend("/topic/result_feed", ohObjectMapper!!.writeValueAsString(resultItem))
                             var msg = WeChatMarkdownMsg(titles[i], contents[i])
                             var gson = Gson()
                             val request = HttpRequest.newBuilder()

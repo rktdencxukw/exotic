@@ -30,6 +30,12 @@ public class DateFormatForJson : WebMvcConfigurer {
     @Bean
     fun jackson2HttpMessageConverter(): MappingJackson2HttpMessageConverter? {
         val converter = MappingJackson2HttpMessageConverter()
+        converter.objectMapper = ohObjectMapper()
+        return converter
+    }
+
+    @Bean
+    fun ohObjectMapper(): ObjectMapper {
         val mapper = ObjectMapper()
         val jm = JavaTimeModule()
         jm.addSerializer(Instant::class.java, MyInstantSerializer())
@@ -42,9 +48,9 @@ public class DateFormatForJson : WebMvcConfigurer {
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
         mapper.setTimeZone(TimeZone.getTimeZone("GMT+8:00"))
         mapper.dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS")
-        converter.objectMapper = mapper
-        return converter
+        return mapper
     }
+
     override fun configureMessageConverters(converters: MutableList<HttpMessageConverter<*>?>) {
         converters.add(jackson2HttpMessageConverter())
     }

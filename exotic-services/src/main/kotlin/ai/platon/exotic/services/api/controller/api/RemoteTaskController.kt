@@ -28,7 +28,7 @@ class RemoteTaskController(
         @RequestParam(defaultValue = "500") pageSize: Int = 500,
         @RequestParam(defaultValue = "desc") direction: String = "desc",
     ): ResponseEntity<List<ExpandedScrapeResponse>> {
-        throw UnsupportedOperationException("Not implemented yet")
+        TODO("Not yet implemented")
         val ascPageNumber = if (direction == "desc") {
             val count = driver.count()
             val totalPageNumber = 1 + count / pageSize

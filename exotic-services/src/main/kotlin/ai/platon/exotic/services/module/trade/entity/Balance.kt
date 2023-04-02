@@ -14,8 +14,8 @@ import javax.persistence.*
 @Table(name = "trade_balances")
 @Entity
 @EntityListeners(AuditingEntityListener::class)
-class Balance(
-) {
+class Balance
+ {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
@@ -25,7 +25,7 @@ class Balance(
     var asset: String = ""
     var total: Double = 0.0
     var free: Double = 0.0
-    var locked: Double = 0.0
+    var frozen: Double = 0.0
 
     @CreatedDate
     var createdDate: Instant = Instant.now()

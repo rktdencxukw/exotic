@@ -33,6 +33,7 @@ class CrawlTaskRunner(
     val portalTaskRepository: PortalTaskRepository,
     val scraper: ExoticCrawler
 ) {
+    private val parameterConcurrentTaskCnt: Int = 5
     private val logger = LoggerFactory.getLogger(CrawlTaskRunner::class.java)
     private val traceLogger = LoggerFactory.getLogger("com.kc.trace")
 
@@ -114,7 +115,7 @@ class CrawlTaskRunner(
             }
 
             // the client controls the retry
-            val portalTasks = pagedPortalUrls.map {
+            val portalTasks = pagedPortalUrls.map { it ->
                 PortalTask(it, "-refresh", 3).also {
                     it.rule = rule
                     it.status = TaskStatus.CREATED
@@ -126,6 +127,7 @@ class CrawlTaskRunner(
 
             logger.debug("Created {} portal tasks", portalTasks.size)
             processingRules.put(rule.id!!, true)
+            loadAndSubmitPortalTasks(parameterConcurrentTaskCnt)
         } catch (t: Throwable) {
             logger.warn(t.stringify())
         }
@@ -138,6 +140,7 @@ class CrawlTaskRunner(
         scraper.scrapeOutPages(createListenablePortalTask(task, true))
     }
 
+    @Synchronized
     fun loadAndSubmitPortalTasks(limit: Int) {
         val order = Sort.Order.asc("id")
         val pageRequest = PageRequest.of(0, limit, Sort.by(order))

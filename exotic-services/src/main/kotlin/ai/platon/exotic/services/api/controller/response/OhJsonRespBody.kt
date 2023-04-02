@@ -19,6 +19,12 @@ class OhJsonRespBody<T> {
         this.data = null
         return this
     }
+    fun error(errMsg: String, data:T): OhJsonRespBody<T> {
+        this.code = -1
+        this.message = "failed"
+        this.data = data
+        return this
+    }
 
     companion object {
         fun error(s: String): OhJsonRespBody<Any>? {

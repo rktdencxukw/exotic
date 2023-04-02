@@ -21,7 +21,8 @@ import java.util.*
         "ai.platon.scent.rest.api",
         "ai.platon.exotic.services.api",
         "ai.platon.exotic.services.module",
-        "ai.platon.pulsar.driver.report"
+        "ai.platon.pulsar.driver.report",
+        "ai.platon.exotic.services.websocket",
     ],
     exclude = [EmbeddedMongoAutoConfiguration::class]
 )
@@ -31,6 +32,7 @@ import java.util.*
     "ai.platon.exotic.standalone.api",
     "ai.platon.pulsar.driver.report", // 扫描 driver中http report controller
     "ai.platon.exotic.services.module",
+    "ai.platon.exotic.services.websocket",
 )
 @EntityScan(
     "ai.platon.exotic.driver.crawl.entity",

@@ -229,6 +229,23 @@
     <logger name="ai.platon.exotic" level="INFO">
         <appender-ref ref="Console"/>
     </logger>
+    <logger name="ai.platon.pulsar.driver.report" level="DEBUG">
+        <appender-ref ref="Console"/>
+    </logger>
+
+
+    <logger name="org.springframework.web.socket" level="DEBUG">
+        <appender-ref ref="Console"/>
+    </logger>
+    <logger name="org.springframework.messaging.simp" level="DEBUG">
+        <appender-ref ref="Console"/>
+    </logger>
+    
+
+<!--    <logger name="ai.platon.exotic.driver" level="INFO">-->
+<!--        <appender-ref ref="Console"/> -->
+<!--    duplicated-->
+<!--    </logger>-->
 
     <logger name="ch.qos.logback.classic" level="WARN"/>
 

@@ -245,7 +245,7 @@ from load_and_select('{{url}}', 'body');
         return ResponseEntity.ok(OhJsonRespBody.ok())
     }
 
-    @GetMapping("pause/{id}")
+    @PostMapping("pause/{id}")
     fun pause(@PathVariable("id") id: Long): ResponseEntity<OhJsonRespBody<String>> {
         val rule = repository.findById(id).orElseThrow { IllegalArgumentException("Invalid rule Id: $id") }
 
@@ -255,13 +255,13 @@ from load_and_select('{{url}}', 'body');
         return ResponseEntity.ok(OhJsonRespBody.ok())
     }
 
-    @GetMapping("start/{id}")
+    @PostMapping("start/{id}")
     fun start(@PathVariable("id") id: Long): ResponseEntity<OhJsonRespBody<String>> {
         val rule = repository.findById(id).orElseThrow { IllegalArgumentException("Invalid rule Id: $id") }
 
-        rule.status = RuleStatus.Created.toString()
+//        rule.status = RuleStatus.Created.toString()
 //        rule.adjustFields()
-        repository.save(rule)
+//        repository.save(rule)
 
         crawlTaskRunner.startCrawl(rule)
 

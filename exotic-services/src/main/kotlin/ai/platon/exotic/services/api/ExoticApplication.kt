@@ -2,12 +2,12 @@ package ai.platon.exotic.services.api
 
 import ai.platon.exotic.driver.crawl.ExoticCrawler
 import ai.platon.pulsar.common.getLogger
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.autoconfigure.domain.EntityScan
-import org.springframework.boot.autoconfigure.jackson.Jackson2ObjectMapperBuilderCustomizer
 import org.springframework.boot.autoconfigure.thymeleaf.ThymeleafProperties
 import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.Bean
@@ -15,7 +15,7 @@ import org.springframework.core.env.Environment
 import org.springframework.core.env.get
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing
 import org.springframework.data.mongodb.core.MongoTemplate
-import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder
+import org.springframework.messaging.simp.SimpMessagingTemplate
 import org.springframework.web.servlet.config.annotation.CorsRegistry
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
 import org.thymeleaf.templateresolver.FileTemplateResolver
@@ -35,7 +35,9 @@ class ExoticApplication(
     val applicationContext: ApplicationContext,
     val defaultThymeleafTemplateResolver: ITemplateResolver,
     val env: Environment,
-    val mongoTemplate: MongoTemplate
+    val mongoTemplate: MongoTemplate,
+    val simpMessagingTemplate: SimpMessagingTemplate,
+    val ohObjectMapper: ObjectMapper
 ) {
     private val logger = getLogger(this)
 
@@ -97,6 +99,6 @@ class ExoticApplication(
 
     @Bean(destroyMethod = "close")
     fun exoticCrawler(): ExoticCrawler {
-        return ExoticCrawler(env, mongoTemplate)
+        return ExoticCrawler(env, mongoTemplate, simpMessagingTemplate, ohObjectMapper)
     }
 }

@@ -62,7 +62,7 @@ from load_and_select('{{url}}', 'body');
 
     @GetMapping("/view/{id}")
     fun view(@PathVariable id: Long): CrawlRule {
-        throw UnsupportedOperationException("Not implemented yet")
+        TODO("Not yet implemented")
         val rule = repository.getById(id)
         // TODO 分页
 //        rule.portalTasks.sortedByDescending { it.id }

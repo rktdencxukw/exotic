@@ -25,6 +25,7 @@ import java.util.*
 @Repository
 interface AccountRepository : JpaRepository<Account, Serializable> {
     fun findAllByAccountId(accountId: Int, pageable: Pageable): Page<Account>
+    fun findAllByEnable(enable: Int=1): List<Account>
 }
 
 @Repository
