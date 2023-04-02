@@ -2,7 +2,6 @@ package ai.platon.exotic.services.module.trade.service
 
 import org.springframework.stereotype.Service
 
-import com.ohquant.client.api.DefaultApi;
 import org.openapitools.client.infrastructure.ClientException
 import org.openapitools.client.infrastructure.ServerException
 import org.openapitools.client.models.ResultDto
