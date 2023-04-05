@@ -1,10 +1,12 @@
 package ai.platon.exotic.services.module.trade.service
 
+import com.ohquant.client.api.DefaultApi
 import org.springframework.stereotype.Service
 
-import org.openapitools.client.infrastructure.ClientException
-import org.openapitools.client.infrastructure.ServerException
 import org.openapitools.client.models.ResultDto
+import org.openapitools.client.models.VectorAssetDto
+import org.openapitools.client.models.VectorOrderDto
+import java.time.Instant
 import javax.annotation.PostConstruct
 
 @Service
@@ -13,11 +15,32 @@ class TradeService {
 
     @PostConstruct
     fun init() {
-        apiInstance = DefaultApi(basePath = "http://124.71.112.150:8081")
+//        apiInstance = DefaultApi(basePath = "http://124.71.112.150:8081")
+        apiInstance = DefaultApi()
     }
 
-    fun getBalance(accountId: Long): ResultDto {
+    fun getFinishedOrder(accountId: Long, sym4s: String, limit: Int, orderIdStartExclusive: String): VectorOrderDto {
+        return if (orderIdStartExclusive != "0") {
+            apiInstance.fetchFinishedOrder(
+                accountId.toString(),
+                sym4s,
+                limit = limit,
+                orderIdStartExclusive = orderIdStartExclusive
+            )
+        } else {
+            val startTime = Instant.now().minusSeconds(60 * 60 * 24 * 15).epochSecond
+            val endTime = Instant.now().epochSecond
+            apiInstance.fetchFinishedOrder(
+                accountId.toString(),
+                sym4s,
+                limit = 1000,
+                timeSecsStart = startTime,
+                timeSecsEnd = endTime
+            )
+        }
+    }
 
+    fun getBalance(accountId: Long): VectorAssetDto {
         return apiInstance.fetchBalance(accountId.toString())
 
 //        try {

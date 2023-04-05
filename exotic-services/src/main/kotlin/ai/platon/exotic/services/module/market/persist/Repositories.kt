@@ -26,11 +26,14 @@ interface DerivateRepository : JpaRepository<Derivate, Serializable> {
 //    @Query("select p from derivates p where p.base like :prefix% limit :pageable.pageNumber*:pageable.pageSize, :pageable.pageSize")
 //    fun findAllByBaseLike(@Param("prefix") prefix: String, pageable: Pageable): Page<Derivate>
     fun findAllByBaseLike(keyword: String, pageable: Pageable): Page<Derivate>
+    fun findAllByBaseAndTargetAndExchangeCgId(base: String, target:String, exchangeCgId: String): List<Derivate>
 }
 
 @Repository
 interface SpotRepository : JpaRepository<Spot, Serializable> {
     fun findAllByBaseLike(keyword: String, pageable: Pageable): Page<Spot>
+    fun findAllByBaseAndExchangeCgId(base: String, exchangeCgId: String): List<Spot>
+    fun findAllByBaseAndTargetAndExchangeCgId(base: String, target:String, exchangeCgId: String): List<Spot>
 }
 
 @Repository

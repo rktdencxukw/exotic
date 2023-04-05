@@ -126,11 +126,17 @@
         <appender-ref ref="DRFA"/>
     </root>
 
-    <logger name="ai.platon.pulsar.protocol.browser.driver.cdt.ChromeDevtoolsBrowser" level="DEBUG">
-        <appender-ref ref="SERVER"/>
-    </logger>
+<!--    <logger name="ai.platon.pulsar.protocol.browser.driver.cdt.ChromeDevtoolsBrowser" level="DEBUG">-->
+<!--        <appender-ref ref="SERVER"/>-->
+<!--    </logger>-->
     <logger name="a.p.p.p.b.d.c.ChromeDevtoolsBrowser" level="DEBUG">
         <appender-ref ref="SERVER"/>
+    </logger>
+    <logger name="com.kc.trace" level="ERROR">
+        <appender-ref ref="DRFA"/>
+    </logger>
+    <logger name="ai.platon.pulsar.driver.report" level="DEBUG">
+        <appender-ref ref="DRFA"/>
     </logger>
 
 </configuration>

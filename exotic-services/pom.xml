@@ -9,7 +9,7 @@
 		<version>1.11.4-SNAPSHOT</version>
 	</parent>
 
-	<artifactId>exotic-services</artifactId>
+	<artifactId>exotic-services-kc</artifactId>
 	<packaging>jar</packaging>
 	<name>Exotic Services</name>
 	<description>The exotic web service</description>
@@ -106,21 +106,21 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-websocket</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>com.squareup.okhttp3</groupId>
-			<artifactId>okhttp</artifactId>
-			<version>4.10.0</version>
-		</dependency>
+<!--		<dependency>-->
+<!--			<groupId>com.squareup.okhttp3</groupId>-->
+<!--			<artifactId>okhttp</artifactId>-->
+<!--			<version>4.10.0</version>-->
+<!--		</dependency>-->
 		<dependency>
 			<groupId>com.ohquant</groupId>
 			<artifactId>kotlin-client</artifactId>
 			<version>1.0.0</version>
-			<exclusions>
-				<exclusion>
-					<groupId>com.squareup.okhttp3</groupId>
-					<artifactId>okhttp</artifactId>
-				</exclusion>
-			</exclusions>
+<!--			<exclusions>-->
+<!--				<exclusion>-->
+<!--					<groupId>com.squareup.okhttp3</groupId>-->
+<!--					<artifactId>okhttp</artifactId>-->
+<!--				</exclusion>-->
+<!--			</exclusions>-->
 		</dependency>
 <!--		<dependency>-->
 <!--			<groupId>com.ohquant</groupId>-->

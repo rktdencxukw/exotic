@@ -225,7 +225,7 @@
             </dependency>
             <dependency>
                 <groupId>ai.platon.exotic</groupId>
-                <artifactId>exotic-services</artifactId>
+                <artifactId>exotic-services-kc</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
