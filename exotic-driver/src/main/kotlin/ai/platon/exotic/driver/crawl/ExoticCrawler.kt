@@ -39,9 +39,13 @@ class ExoticCrawler(
             ?: System.getProperty("scrape.authToken")
             ?: "b06test42c13cb000f74539b20be9550b8a1a90b9"
 
-    private val reportServer = "http://127.0.0.1:${env!!.getProperty("server.port")}${env!!.getProperty("server.servlet.context-path")}"
+    private val reportServer = env!!.getProperty("report.server.uri", "http://127.0.0.1:${env!!.getProperty("server.port")}${env!!.getProperty("server.servlet.context-path")}")
     // TODO 获取局域网地址
 //    private val reportServer = "http://192.168.68.137:${env!!.getProperty("server.port")}${env!!.getProperty("server.servlet.context-path")}"
+
+    init {
+        println("reportServer: $reportServer")
+    }
 
     val driverSettings get() = DriverSettings(
         scrapeServer,

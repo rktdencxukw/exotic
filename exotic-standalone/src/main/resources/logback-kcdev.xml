@@ -270,7 +270,7 @@
     <logger name="com.kc.trace" level="ERROR">
         <appender-ref ref="DRFA"/>
     </logger>
-    <logger name="ai.platon.pulsar.driver.report" level="DEBUG">
+    <logger name="ai.platon.pulsar.driver" level="DEBUG">
         <appender-ref ref="DRFA"/>
     </logger>
 

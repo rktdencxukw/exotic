@@ -32,6 +32,7 @@ class FinishedOrder(
     var orderId: String = ""
     var side: String = ""
     var price: Double = 0.0
+    var avgPrice: Double = 0.0
     var amount: Double = 0.0
     var filledAmount: Double = 0.0
 

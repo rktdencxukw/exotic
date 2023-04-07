@@ -11,6 +11,8 @@ enum class RuleStatus {
     Paused,
     Finished,
     Archived
+
+
 }
 
 enum class RuleType {
@@ -21,6 +23,7 @@ enum class RuleType {
 enum class RenderType {
     Browser,
     Api,
+    Resource,
 }
 
 enum class TaskStatus(

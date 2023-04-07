@@ -285,6 +285,7 @@ class TradeController(
         b.price = dto.price
         b.amount = dto.amount
         b.filledAmount = dto.filledAmount
+        b.avgPrice = dto.avgPrice
         b.lastModifiedDate = Instant.now()
         return b
     }

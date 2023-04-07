@@ -151,8 +151,14 @@ from load_and_select('{{url}}', 'body');
             return ResponseEntity.badRequest().body(OhJsonRespBody<ScrapeTask?>().error(msg))
         }
         // TODO not retry
-        var portalTask = PortalTask(rule.portalUrls, "", 3)
-        var scrapeTask = ScrapeTask(rule.portalUrls, "", 3, rule.sqlTemplate!!)
+        val args = if (rule.renderType == RenderType.Resource.toString()) {
+            buildEntityWithoutBrowserArgs(rule, true, exoticCrawler.driverSettings.authToken)
+        } else {
+            buildPortalArgs(rule, true, exoticCrawler.driverSettings.authToken)
+        }
+        var portalTask = PortalTask(rule.portalUrls, args, 3)
+        portalTask.rule = rule
+        var scrapeTask = ScrapeTask(rule.portalUrls, args, 3, rule.sqlTemplate!!)
         scrapeTask.companionPortalTask = portalTask
 
         val listenableScrapeTask = ListenableScrapeTask(scrapeTask).also {
@@ -191,6 +197,33 @@ from load_and_select('{{url}}', 'body');
 
         return ResponseEntity.ok(OhJsonRespBody(scrapeTask))
     }
+    // FIXME 与别处重复，临时放置
+    /**
+     * -scrollCount 25: scroll down 25 extra times
+     * */
+    private fun buildPortalArgs(rule: CrawlRule, refresh: Boolean, token: String): String {
+        var args = rule.buildArgs() + " -scrollCount 25"
+        args += if (refresh) " -refresh" else ""
+        args += " -authToken " + token
+        return args
+    }
+
+    /**
+     * -scrollCount 25: scroll down 25 extra times
+     * */
+    private fun buildItemArgs(rule: CrawlRule, portalRefresh: Boolean, token: String): String {
+        var args = rule.buildArgs() + " -scrollCount 20"
+        args += if (portalRefresh) " -expires 2h" else " -expires 3600d"
+        args += " -authToken " + token
+        return args
+    }
+
+    private fun buildEntityWithoutBrowserArgs(rule: CrawlRule, portalRefresh: Boolean, token: String): String {
+        var args = rule.buildArgs() + " -resource"
+        args += " -refresh"
+        args += " -authToken " + token
+        return args
+    }
 
 //    @GetMapping("/edit/{id}")
 //    fun edit(@PathVariable("id") id: Long,
@@ -206,6 +239,16 @@ from load_and_select('{{url}}', 'body');
 //        val rule = repository.findById(id).orElseThrow { IllegalArgumentException("Invalid rule Id: $id") }
 //        return ResponseEntity.ok(OhJsonRespBody.ok(rule))
 //    }
+
+@PostMapping("set_status/{id}")
+fun setStatus(
+    @PathVariable("id") id: Long, @Valid @RequestParam status: RuleStatus
+): ResponseEntity<OhJsonRespBody<String>> {
+    val old = repository.findById(id).orElseThrow { IllegalArgumentException("Invalid rule Id: $id") }
+    old.status = status.toString()
+    repository.save(old)
+    return ResponseEntity.ok().body(OhJsonRespBody.ok())
+}
 
     @PostMapping("update/{id}")
     fun update(

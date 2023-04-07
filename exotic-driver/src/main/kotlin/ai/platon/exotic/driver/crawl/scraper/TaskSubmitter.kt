@@ -104,7 +104,7 @@ open class TaskSubmitter(
                 "mock." + RandomStringUtils.randomAlphanumeric(10)
             } else {
 //                driver.submit(sql, task.priority, false)
-                driver.submitWithProcess(sql) {
+                driver.submitWithProcess(sql, listenableTask.task.companionPortalTask!!.rule!!.scrapeServer) {
                     listenableTask.task.response = it
 //                    if (it.)
                     // TODO should judge the status code

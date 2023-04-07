@@ -265,4 +265,8 @@
     <logger name="org.apache.hadoop.conf.Configuration" level="WARN"/>
     <logger name="org.apache.gora" level="ERROR"/>
 
+    <logger name="com.kc.trace" level="ERROR">
+        <appender-ref ref="DRFA"/>
+    </logger>
+
 </configuration>

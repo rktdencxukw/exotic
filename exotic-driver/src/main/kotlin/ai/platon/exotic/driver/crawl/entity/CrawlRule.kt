@@ -98,6 +98,8 @@ class CrawlRule {
     @Column(name = "render_type", length = 16)
     var renderType: String? = RenderType.Browser.toString()
 
+    var scrapeServer: String? = "127.0.0.1:8182"
+
     /**
      * ids of last page in EntityListRule or last item in EntityItemRule
      */

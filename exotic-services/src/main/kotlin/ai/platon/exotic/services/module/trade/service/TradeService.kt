@@ -6,17 +6,22 @@ import org.springframework.stereotype.Service
 import org.openapitools.client.models.ResultDto
 import org.openapitools.client.models.VectorAssetDto
 import org.openapitools.client.models.VectorOrderDto
+import org.springframework.core.env.Environment
 import java.time.Instant
 import javax.annotation.PostConstruct
 
 @Service
-class TradeService {
+class TradeService(
+    val env: Environment,
+) {
     lateinit var apiInstance: DefaultApi
 
     @PostConstruct
     fun init() {
 //        apiInstance = DefaultApi(basePath = "http://124.71.112.150:8081")
-        apiInstance = DefaultApi()
+        val executorServer = env.getProperty("oh_executor.server", "124.71.112.150:8081") // hw-gz-1
+        println("executorServer: $executorServer")
+        apiInstance = DefaultApi("http://$executorServer")
     }
 
     fun getFinishedOrder(accountId: Long, sym4s: String, limit: Int, orderIdStartExclusive: String): VectorOrderDto {

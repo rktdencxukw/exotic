@@ -97,7 +97,11 @@ open class OutPageScraper(
         }
 
         val sqlTemplate = rule.sqlTemplate?.trim()
-        val args = buildPortalArgs(rule, listenablePortalTask.refresh)
+        val args = if (rule.renderType == RenderType.Resource.toString()) {
+            buildEntityWithoutBrowserArgs(rule, listenablePortalTask.refresh)
+        } else {
+            buildPortalArgs(rule, listenablePortalTask.refresh)
+        }
         val priority = task.priority
 
         val scrapeTask = ScrapeTask(task.url, args, priority, sqlTemplate!!)
@@ -113,7 +117,7 @@ open class OutPageScraper(
                 if (resultSet.isNullOrEmpty()) {
                     logger.warn("No result set | {}", it.task.configuredUrl)
                 } else {
-                    var ids = resultSet[0]["ids"] as ArrayList<String>?
+                    var ids = resultSet[0]["ids"] as? ArrayList<String>
                     if (ids.isNullOrEmpty()) {
                         logger.warn("No ids in task #{} | {}", task.id, it.task.configuredUrl)
                     } else {
@@ -129,7 +133,10 @@ open class OutPageScraper(
                             val resultItem = ResultItem(task.rule!!.id!!, task.id!!, ids[i], titles[i], contents[i])
                             mongoTemplate.save(resultItem)
                             // TODO 通知界面端 websocket
-                            simpMessagingTemplate!!.convertAndSend("/topic/result_feed", ohObjectMapper!!.writeValueAsString(resultItem))
+                            simpMessagingTemplate!!.convertAndSend(
+                                "/topic/result_feed",
+                                ohObjectMapper!!.writeValueAsString(resultItem)
+                            )
                             var msg = WeChatMarkdownMsg(titles[i], contents[i])
                             var gson = Gson()
                             val request = HttpRequest.newBuilder()
@@ -297,6 +304,13 @@ open class OutPageScraper(
     private fun buildItemArgs(rule: CrawlRule, portalRefresh: Boolean): String {
         var args = rule.buildArgs() + " -scrollCount 20"
         args += if (portalRefresh) " -expires 2h" else " -expires 3600d"
+        args += " -authToken " + driverSettings.authToken
+        return args
+    }
+
+    private fun buildEntityWithoutBrowserArgs(rule: CrawlRule, portalRefresh: Boolean): String {
+        var args = rule.buildArgs() + " -resource"
+        args += " -refresh"
         args += " -authToken " + driverSettings.authToken
         return args
     }
