@@ -106,6 +106,8 @@ class CrawlRule {
     @Column(name = "ids_of_last", length = 1024)
     var idsOfLast: String = ""
 
+    var waitForSelector: String? = null
+    var waitForTimeoutMillis: Long? = 30000L
 
     /**
      * The time difference, in minutes, between UTC time and local time.
@@ -169,6 +171,7 @@ class CrawlRule {
     val localLastModifiedDateTime: LocalDateTime
         get() = lastModifiedDate.atOffset(zoneOffset).toLocalDateTime()
 
+    // kcread 按 LoadOptions 格式组装参数，稍后会加入到 sql 向pulsar提交
     fun buildArgs(): String {
         val taskTime = LocalDateTime.now().truncatedTo(ChronoUnit.HOURS)
         val formattedTime = DateTimes.format(taskTime, "YYMMddHH")
@@ -177,6 +180,12 @@ class CrawlRule {
         var args = "-taskId $taskId -taskTime $taskTime"
         if (deadTime != DateTimes.doomsday) {
             args += " -deadTime $deadTime"
+        }
+        if (waitForSelector != null) {
+            args += " -waitForSelector $waitForSelector"
+        }
+        if (waitForTimeoutMillis != null) {
+            args += " -waitForTimeoutMillis $waitForTimeoutMillis"
         }
         return args
     }

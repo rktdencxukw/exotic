@@ -318,6 +318,7 @@ open class OutPageScraper(
         return args
     }
 
+    // kcread 按 LoadOptions 格式组装参数，稍后会加入到 sql 向pulsar提交
     private fun buildEntityWithoutBrowserArgs(rule: CrawlRule, portalRefresh: Boolean): String {
         var args = rule.buildArgs() + " -resource"
         args += " -refresh"
