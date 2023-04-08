@@ -272,7 +272,7 @@ fun setStatus(
             rule.lastCrawlTime = old.lastCrawlTime
             rule.crawlHistory = old.crawlHistory
             rule.idsOfLast = old.idsOfLast
-            rule.type = old.type
+//            rule.type = old.type
         }
 
         if (!rule.period.isNegative) { // 没用 cron

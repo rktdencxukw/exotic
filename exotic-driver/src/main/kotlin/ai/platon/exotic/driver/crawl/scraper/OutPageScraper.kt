@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.data.mongodb.core.MongoTemplate
 import org.springframework.messaging.simp.SimpMessagingTemplate
 import java.net.URI
+import java.net.URL
 import java.net.http.HttpClient
 import java.net.http.HttpRequest
 import java.net.http.HttpRequest.BodyPublishers
@@ -122,7 +123,8 @@ open class OutPageScraper(
                         logger.warn("No ids in task #{} | {}", task.id, it.task.configuredUrl)
                     } else {
                         var titles = resultSet[0]["titles"] as ArrayList<String>
-                        var contents = resultSet[0]["contents"] as ArrayList<String>
+                        var contents = resultSet[0]["contents"] as? ArrayList<String>
+                        var hrefs = resultSet[0]["hrefs"] as? ArrayList<String>
                         val oldSet: Set<String> = rule.idsOfLast.split(",").map { it.trim() }.toSet()
                         var resultCount = 0
                         for (i in ids.indices) {
@@ -130,14 +132,22 @@ open class OutPageScraper(
                                 break
                             }
                             ++resultCount
-                            val resultItem = ResultItem(task.rule!!.id!!, task.id!!, ids[i], titles[i], contents[i])
+                            var content: String = (contents?.get(i))?:""
+                            var href: String = (hrefs?.get(i))?:""
+                            if (href.isNotEmpty()) {
+                                // get host from url
+                                var url = URL(task.url);
+                                val host = url.host;
+                                href = "$host/$href"
+                            }
+                            val resultItem = ResultItem(task.rule!!.id!!, task.id!!, ids[i], titles[i], href, content)
                             mongoTemplate.save(resultItem)
                             // TODO 通知界面端 websocket
                             simpMessagingTemplate!!.convertAndSend(
                                 "/topic/result_feed",
                                 ohObjectMapper!!.writeValueAsString(resultItem)
                             )
-                            var msg = WeChatMarkdownMsg(titles[i], contents[i])
+                            var msg = WeChatMarkdownMsg(titles[i], content)
                             var gson = Gson()
                             val request = HttpRequest.newBuilder()
                                 .uri(URI.create("https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=5932e314-7ffe-47bd-a097-87e9a39af354"))
