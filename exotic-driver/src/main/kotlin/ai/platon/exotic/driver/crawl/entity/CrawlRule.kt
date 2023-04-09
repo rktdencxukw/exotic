@@ -11,6 +11,7 @@ import com.cronutils.descriptor.CronDescriptor
 import com.cronutils.model.Cron
 import com.cronutils.model.CronType
 import com.cronutils.model.definition.CronDefinitionBuilder
+import com.cronutils.model.time.ExecutionTime
 import com.cronutils.parser.CronParser
 import com.fasterxml.jackson.annotation.JsonIdentityInfo
 import com.fasterxml.jackson.annotation.ObjectIdGenerators
@@ -18,10 +19,7 @@ import org.springframework.data.annotation.CreatedDate
 import org.springframework.data.annotation.LastModifiedDate
 import org.springframework.data.jpa.domain.support.AuditingEntityListener
 import org.springframework.format.annotation.DateTimeFormat
-import java.time.Duration
-import java.time.Instant
-import java.time.LocalDateTime
-import java.time.ZoneOffset
+import java.time.*
 import java.time.temporal.ChronoUnit
 import java.util.*
 import javax.persistence.*
@@ -163,6 +161,33 @@ class CrawlRule {
                 }
             }
             return "-"
+        }
+    companion object {
+        val FAR_TIME: Instant = Instant.parse("2300-12-31T23:59:59.999999999Z")
+    }
+    val nextCrawlTime: Instant
+        get() {
+            if (period.seconds > 0) {
+                return lastCrawlTime +period
+            }
+
+            if (cronExpression.isNullOrBlank()) {
+                return FAR_TIME
+            }
+
+            val cronDefinition = CronDefinitionBuilder.instanceDefinitionFor(CronType.QUARTZ)
+            val parser = CronParser(cronDefinition)
+            val quartzCron: Cron = parser.parse(cronExpression)
+            quartzCron.validate()
+            val executionTime = ExecutionTime.forCron(quartzCron)
+
+            val zonedLastCrawlTime = lastCrawlTime.atZone(DateTimes.zoneId)
+            val nextExecution = executionTime.nextExecution(zonedLastCrawlTime)
+            return if (nextExecution.isPresent) {
+                nextExecution.get().toInstant()
+            } else {
+                lastCrawlTime;
+            }
         }
 
     val localCreatedDateTime: LocalDateTime
