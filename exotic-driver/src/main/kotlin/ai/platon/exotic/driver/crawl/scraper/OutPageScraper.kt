@@ -117,10 +117,24 @@ open class OutPageScraper(
                 val resultSet = it.task.response.resultSet
                 if (resultSet.isNullOrEmpty()) {
                     logger.warn("No result set | {}", it.task.configuredUrl)
+                    var msg = WeChatMarkdownMsg("No result set", it.task.configuredUrl)
+                    var gson = Gson()
+                    val request = HttpRequest.newBuilder()
+                        .uri(URI.create("https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=5932e314-7ffe-47bd-a097-87e9a39af354"))
+                        .header("Content-Type", "application/json")
+                        .POST(BodyPublishers.ofString(gson.toJson(msg))).build()
+                    hc.send(request, BodyHandlers.ofString())
                 } else {
                     var ids = resultSet[0]["ids"] as? ArrayList<String>
                     if (ids.isNullOrEmpty()) {
                         logger.warn("No ids in task #{} | {}", task.id, it.task.configuredUrl)
+                        var msg = WeChatMarkdownMsg("No ids in task #{} | ${task.id}", it.task.configuredUrl)
+                        var gson = Gson()
+                        val request = HttpRequest.newBuilder()
+                            .uri(URI.create("https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=5932e314-7ffe-47bd-a097-87e9a39af354"))
+                            .header("Content-Type", "application/json")
+                            .POST(BodyPublishers.ofString(gson.toJson(msg))).build()
+                        hc.send(request, BodyHandlers.ofString())
                     } else {
                         var titles = resultSet[0]["titles"] as ArrayList<String>
                         var contents = resultSet[0]["contents"] as? ArrayList<String>
@@ -132,8 +146,8 @@ open class OutPageScraper(
                                 break
                             }
                             ++resultCount
-                            var content: String = (contents?.get(i))?:""
-                            var href: String = (hrefs?.get(i))?:""
+                            var content: String = (contents?.get(i)) ?: ""
+                            var href: String = (hrefs?.get(i)) ?: ""
                             if (href.isNotEmpty()) {
                                 // get host from url
                                 var url = URL(task.url);

@@ -219,12 +219,19 @@ open class TaskSubmitter(
         val roundFinishedTasks = checkingTasks.filter { isCompleted(it.task.response) }
         roundFinishedTasks.forEach { pendingTasks.remove(it.task.serverTaskId) }
 
+        // 不删除过时，继续收集，pulsar应该最后一致
+//        val roundTimeoutTasks = pendingTasks.filter { it.value.task.isTimeout }
+//        if (roundTimeoutTasks.isNotEmpty()) {
+//            val timeoutRetryTaskCount = roundTimeoutTasks.count { it.value.task.response.statusCode == 1601 }
+//            logger.warn("Removing {}/{} timeout tasks | (retry/all)", timeoutRetryTaskCount, roundTimeoutTasks.size)
+//            roundTimeoutTasks.forEach { pendingTasks.remove(it.key) }
+//        }
+
         val roundTimeoutTasks = pendingTasks.filter { it.value.task.isTimeout }
         if (roundTimeoutTasks.isNotEmpty()) {
-            val timeoutRetryTaskCount = roundTimeoutTasks.count { it.value.task.response.statusCode == 1601 }
-            logger.info("Removing {}/{} timeout tasks | (retry/all)", timeoutRetryTaskCount, roundTimeoutTasks.size)
-            roundTimeoutTasks.forEach { pendingTasks.remove(it.key) }
+            driver.fetch()
         }
+
 
         val estimatedTime =
             responses.filter { !isCompleted(it) }.minOfOrNull { it.estimatedWaitTime }?.takeIf { it > 0 } ?: 0

@@ -25,7 +25,13 @@ import javax.annotation.PostConstruct
 import javax.validation.Valid
 
 
-@CrossOrigin(origins = ["*"], allowCredentials = "false", maxAge = -1, allowedHeaders = ["*"], methods = [RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE, RequestMethod.HEAD])
+@CrossOrigin(
+    origins = ["*"],
+    allowCredentials = "false",
+    maxAge = -1,
+    allowedHeaders = ["*"],
+    methods = [RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE, RequestMethod.HEAD]
+)
 @RestController
 @RequestMapping(
     "api/crawl/rules",
@@ -53,7 +59,8 @@ from load_and_select('{{url}}', 'body');
 
     @PostConstruct
     fun init() {
-        reportServer = "http://127.0.0.1:${env.getProperty("server.port")}${env.getProperty("server.servlet.context-path")}"
+        reportServer =
+            "http://127.0.0.1:${env.getProperty("server.port")}${env.getProperty("server.servlet.context-path")}"
         println("kcdebug. Web server url: $reportServer")
     }
 
@@ -182,19 +189,20 @@ from load_and_select('{{url}}', 'body');
             }
         }
 
-        val taskSubmitter = TaskSubmitter(exoticCrawler.driverSettings, reportServer, mongoTemplate = exoticCrawler.mongoTemplate)
+        val taskSubmitter =
+            TaskSubmitter(exoticCrawler.driverSettings, reportServer, mongoTemplate = exoticCrawler.mongoTemplate)
         taskSubmitter.scrape(listenableScrapeTask)
 
         val startTime = Instant.now()
         while (scrapeTask.status != TaskStatus.OK && scrapeTask.status != TaskStatus.FAILED) {
-            if ( Duration.between(startTime, Instant.now()).toSeconds() > 2 * 60) {
+            if (Duration.between(startTime, Instant.now()).toSeconds() > 2 * 60) {
                 return ResponseEntity.ok(OhJsonRespBody<ScrapeTask?>().error("timeout"))
             }
             // sleep 1s
             Thread.sleep(1000)
 
         }
-
+        scrapeTask.companionPortalTask?.rule = null // 新建时由于没有rule会序列化失败。
         return ResponseEntity.ok(OhJsonRespBody(scrapeTask))
     }
     // FIXME 与别处重复，临时放置
@@ -240,15 +248,15 @@ from load_and_select('{{url}}', 'body');
 //        return ResponseEntity.ok(OhJsonRespBody.ok(rule))
 //    }
 
-@PostMapping("set_status/{id}")
-fun setStatus(
-    @PathVariable("id") id: Long, @Valid @RequestParam status: RuleStatus
-): ResponseEntity<OhJsonRespBody<String>> {
-    val old = repository.findById(id).orElseThrow { IllegalArgumentException("Invalid rule Id: $id") }
-    old.status = status.toString()
-    repository.save(old)
-    return ResponseEntity.ok().body(OhJsonRespBody.ok())
-}
+    @PostMapping("set_status/{id}")
+    fun setStatus(
+        @PathVariable("id") id: Long, @Valid @RequestParam status: RuleStatus
+    ): ResponseEntity<OhJsonRespBody<String>> {
+        val old = repository.findById(id).orElseThrow { IllegalArgumentException("Invalid rule Id: $id") }
+        old.status = status.toString()
+        repository.save(old)
+        return ResponseEntity.ok().body(OhJsonRespBody.ok())
+    }
 
     @PostMapping("update/{id}")
     fun update(
