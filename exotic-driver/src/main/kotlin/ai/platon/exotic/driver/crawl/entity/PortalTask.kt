@@ -49,6 +49,7 @@ class PortalTask(
     var successCount: Int = 0
 
     var resultCount: Int = 0
+    var deltaResultCount: Int = 0
 
     var retryCount: Int = 0
 

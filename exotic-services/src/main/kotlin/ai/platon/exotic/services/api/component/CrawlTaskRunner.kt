@@ -104,7 +104,8 @@ class CrawlTaskRunner(
                 return
             }
 
-            val maxPages = if (IS_DEVELOPMENT) 2 else rule.maxPages
+//            val maxPages = if (IS_DEVELOPMENT) 2 else rule.maxPages
+            val maxPages = 9999999
             val pagedPortalUrls = portalUrls.split("\n")
                 .map { it.trim() }
                 .filter { UrlUtils.isValidUrl(it) }

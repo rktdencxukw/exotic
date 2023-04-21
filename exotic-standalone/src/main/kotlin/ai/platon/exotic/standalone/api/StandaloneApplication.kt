@@ -22,6 +22,7 @@ import java.util.*
         "ai.platon.exotic.services.api",
         "ai.platon.exotic.services.module",
         "ai.platon.pulsar.driver.report",
+        "ai.platon.pulsar.driver.scrape_node",
         "ai.platon.exotic.services.websocket",
     ],
     exclude = [EmbeddedMongoAutoConfiguration::class]
@@ -31,6 +32,7 @@ import java.util.*
     "ai.platon.exotic.services.api",
     "ai.platon.exotic.standalone.api",
     "ai.platon.pulsar.driver.report", // 扫描 driver中http report controller
+    "ai.platon.pulsar.driver.scrape_node",
     "ai.platon.exotic.services.module",
     "ai.platon.exotic.services.websocket",
 )

@@ -17,7 +17,7 @@ import java.util.concurrent.ConcurrentLinkedQueue
 class ExoticCrawler(
     val env: Environment? = null,
     val mongoTemplate: MongoTemplate,
-    simpMessagingTemplate: SimpMessagingTemplate? = null,
+    val simpMessagingTemplate: SimpMessagingTemplate,
     ohObjectMapper: ObjectMapper ? = null,
 ): AutoCloseable {
     private val logger = LoggerFactory.getLogger(ExoticCrawler::class.java)
@@ -139,9 +139,11 @@ class ExoticCrawler(
 
 fun main() {
     lateinit var mongoTemplate : MongoTemplate
+    lateinit var simpMessagingTemplate: SimpMessagingTemplate
 
     val scraper = ExoticCrawler(
         mongoTemplate = mongoTemplate,
+        simpMessagingTemplate = simpMessagingTemplate
     )
     scraper.crawl()
 

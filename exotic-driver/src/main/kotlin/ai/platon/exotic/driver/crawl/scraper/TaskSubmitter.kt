@@ -13,6 +13,7 @@ import org.apache.commons.lang3.RandomStringUtils
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.data.mongodb.core.MongoTemplate
+import org.springframework.messaging.simp.SimpMessagingTemplate
 import java.time.Duration
 import java.time.Instant
 import java.time.temporal.ChronoUnit
@@ -26,10 +27,11 @@ open class TaskSubmitter(
     private val reportServer: String,
     private val autoCollect: Boolean = true,
     private val mongoTemplate: MongoTemplate,
+    private val simpMessagingTemplate: SimpMessagingTemplate,
 ) : AutoCloseable {
     var logger: Logger = LoggerFactory.getLogger(TaskSubmitter::class.java)
     private var dryRun = System.getProperty("scrape.submitter.dry.run") == "true"
-    var driver = Driver(driverSettings.scrapeServer, driverSettings.authToken, reportServer, mongoTemplate)
+    var driver = Driver(driverSettings.scrapeServer, driverSettings.authToken, reportServer, mongoTemplate, simpMessagingTemplate)
 
     private val pendingTasks: MutableMap<String, ListenableScrapeTask> = ConcurrentSkipListMap()
     private val retryingTaskIds: ConcurrentSkipListSet<String> = ConcurrentSkipListSet()

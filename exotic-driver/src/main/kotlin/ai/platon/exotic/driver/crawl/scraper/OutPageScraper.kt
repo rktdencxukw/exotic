@@ -48,7 +48,7 @@ open class OutPageScraper(
     private val driverSettings: DriverSettings,
     private val reportServer: String,
     private val mongoTemplate: MongoTemplate,
-    private val simpMessagingTemplate: SimpMessagingTemplate? = null,
+    private val simpMessagingTemplate: SimpMessagingTemplate,
     private val ohObjectMapper: ObjectMapper? = null,
 ) : AutoCloseable {
     var logger: Logger = LoggerFactory.getLogger(OutPageScraper::class.java)
@@ -56,7 +56,7 @@ open class OutPageScraper(
     val httpTimeout: Duration = Duration.ofMinutes(3)
     val hc = HttpClient.newHttpClient()
 
-    val taskSubmitter: TaskSubmitter = TaskSubmitter(driverSettings, reportServer, true, mongoTemplate)
+    val taskSubmitter: TaskSubmitter = TaskSubmitter(driverSettings, reportServer, true, mongoTemplate, simpMessagingTemplate)
 
     fun scrape(sql: String) {
         val a = """
@@ -140,12 +140,12 @@ open class OutPageScraper(
                         var contents = resultSet[0]["contents"] as? ArrayList<String>
                         var hrefs = resultSet[0]["hrefs"] as? ArrayList<String>
                         val oldSet: Set<String> = rule.idsOfLast.split(",").map { it.trim() }.toSet()
-                        var resultCount = 0
+                        var deltaResultCount = 0
                         for (i in ids.indices) {
                             if (oldSet.contains(ids[i])) {
                                 break
                             }
-                            ++resultCount
+                            ++deltaResultCount
                             var content: String = (contents?.get(i)) ?: ""
                             var href: String = (hrefs?.get(i)) ?: ""
                             if (href.isNotEmpty()) {
@@ -161,16 +161,17 @@ open class OutPageScraper(
                                 "/topic/result_feed",
                                 ohObjectMapper!!.writeValueAsString(resultItem)
                             )
-                            var msg = WeChatMarkdownMsg(titles[i], content)
-                            var gson = Gson()
-                            val request = HttpRequest.newBuilder()
-                                .uri(URI.create("https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=5932e314-7ffe-47bd-a097-87e9a39af354"))
-                                .header("Content-Type", "application/json")
-                                .POST(BodyPublishers.ofString(gson.toJson(msg))).build()
-                            hc.send(request, BodyHandlers.ofString())
+//                            var msg = WeChatMarkdownMsg(titles[i], content)
+//                            var gson = Gson()
+//                            val request = HttpRequest.newBuilder()
+//                                .uri(URI.create("https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=5932e314-7ffe-47bd-a097-87e9a39af354"))
+//                                .header("Content-Type", "application/json")
+//                                .POST(BodyPublishers.ofString(gson.toJson(msg))).build()
+//                            hc.send(request, BodyHandlers.ofString())
                             // val response = hc.send(request, BodyHandlers.ofString()).body()
                         }
-                        it.task.companionPortalTask!!.resultCount = resultCount
+                        it.task.companionPortalTask!!.deltaResultCount = deltaResultCount
+                        it.task.companionPortalTask!!.resultCount = ids.size
                     }
                 }
 

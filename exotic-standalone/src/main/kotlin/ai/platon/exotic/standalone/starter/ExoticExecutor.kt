@@ -33,6 +33,7 @@ class ExoticExecutor(val argv: Array<String>) {
         private set
     var server = false
         private set
+    internal var prd = false
     var criticalHelp = false
         private set
     var help = false
@@ -118,6 +119,7 @@ class ExoticExecutor(val argv: Array<String>) {
             if (arg.equals("sql", true)) sql = "help"
             if (arg.equals("serve", true)) server = true
             if (arg.equals("server", true)) server = true
+            if (arg.equals("prd", true)) prd = true
 
             if (arg in listOf("-v", "-verbose")) {
                 helpVerbose = true
@@ -130,15 +132,19 @@ class ExoticExecutor(val argv: Array<String>) {
             scrape -> {
                 lastHelpMessage = formatOptionHelp(scrapeOptions())
             }
+
             arrange -> {
                 lastHelpMessage = "Detect the url groups"
             }
+
             harvest -> {
                 lastHelpMessage = formatOptionHelp(harvestOptions())
             }
+
             sql == "help" -> {
                 lastHelpMessage = formatXSQLHelp(xsqlHelp())
             }
+
             server -> lastHelpMessage = "Run the Exotic server and web console"
             else -> lastHelpMessage = MAIN_HELP
         }
@@ -188,9 +194,14 @@ class ExoticExecutor(val argv: Array<String>) {
     }
 
     internal fun runServer() {
+        var profile = if (this.prd) {
+            "mysql"
+        } else {
+            "dev"
+        }
         SpringApplicationBuilder(StandaloneApplication::class.java)
 //            .profiles("h2")
-            .profiles("mysql")
+            .profiles(profile)
             .initializers(ScentContextInitializer())
             .registerShutdownHook(true)
             .run(*argv)
@@ -355,7 +366,7 @@ $option:
     }
 
     companion object {
-        val MAIN_HELP = ResourceLoader.readString("help/main.txt")  +
+        val MAIN_HELP = ResourceLoader.readString("help/main.txt") +
                 "\n\n" + ResourceLoader.readString("help/examples.txt")
     }
 }

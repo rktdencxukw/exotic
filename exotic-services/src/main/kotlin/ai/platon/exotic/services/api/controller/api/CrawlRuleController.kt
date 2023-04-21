@@ -43,8 +43,9 @@ class CrawlRuleController(
     private val crawlTaskRunner: CrawlTaskRunner,
     private val exoticCrawler: ExoticCrawler,
     @Autowired
-    private val env: Environment
-) {
+    private val env: Environment,
+
+    ) {
     private val amazonSeeds = LinkExtractors.fromResource("sites/amazon/best-sellers.txt")
     private val amazonItemSQLTemplate = ResourceLoader.readString("sites/amazon/sqls/x-item.sql").trim()
     private val sqlTemplate = """
@@ -190,7 +191,12 @@ from load_and_select('{{url}}', 'body');
         }
 
         val taskSubmitter =
-            TaskSubmitter(exoticCrawler.driverSettings, reportServer, mongoTemplate = exoticCrawler.mongoTemplate)
+            TaskSubmitter(
+                exoticCrawler.driverSettings,
+                reportServer,
+                mongoTemplate = exoticCrawler.mongoTemplate,
+                simpMessagingTemplate = exoticCrawler.simpMessagingTemplate
+            )
         taskSubmitter.scrape(listenableScrapeTask)
 
         val startTime = Instant.now()
@@ -342,4 +348,16 @@ from load_and_select('{{url}}', 'body');
 
 //        return "redirect:/crawl/rules/admin/"
 //    }
+
+    @PostMapping("start_batch")
+    fun startBatch(
+        @RequestParam ids: List<Long> = listOf()
+    ): ResponseEntity<OhJsonRespBody<String>> {
+        for (id in ids) {
+            val rule = repository.findById(id).orElseThrow { IllegalArgumentException("Invalid rule Id: $id") }
+            crawlTaskRunner.startCrawl(rule)
+        }
+
+        return ResponseEntity.ok(OhJsonRespBody.ok())
+    }
 }

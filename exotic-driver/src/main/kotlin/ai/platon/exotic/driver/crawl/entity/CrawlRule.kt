@@ -7,6 +7,8 @@ import ai.platon.exotic.driver.crawl.scraper.RuleStatus
 import ai.platon.exotic.driver.crawl.scraper.RuleType
 import ai.platon.pulsar.common.DateTimes
 import ai.platon.pulsar.common.urls.UrlUtils
+import ai.platon.pulsar.persist.metadata.FetchMode
+import ai.platon.pulsar.persist.metadata.IpType
 import com.cronutils.descriptor.CronDescriptor
 import com.cronutils.model.Cron
 import com.cronutils.model.CronType
@@ -97,6 +99,9 @@ class CrawlRule {
     var renderType: String? = RenderType.Browser.toString()
 
     var scrapeServer: String? = "127.0.0.1:8182"
+    var proxyServer: String? = ""
+
+    var fetchMode: String? = FetchMode.BROWSER.toString()
 
     /**
      * ids of last page in EntityListRule or last item in EntityItemRule
@@ -106,6 +111,9 @@ class CrawlRule {
 
     var waitForSelector: String? = null
     var waitForTimeoutMillis: Long? = 30000L
+
+    var ipTypeWant: String = IpType.SERVER.name
+    var fetchModeWant: String = FetchMode.BROWSER.name
 
     /**
      * The time difference, in minutes, between UTC time and local time.
@@ -196,7 +204,7 @@ class CrawlRule {
     val localLastModifiedDateTime: LocalDateTime
         get() = lastModifiedDate.atOffset(zoneOffset).toLocalDateTime()
 
-    // kcread 按 LoadOptions 格式组装参数，稍后会加入到 sql 向pulsar提交
+    // kcread 按 LoadOptions 格式组装参数，稍后会加入到 sql 向pulsar提交。会被更具体类型任务调用这里，所以这里只处理公共部分
     fun buildArgs(): String {
         val taskTime = LocalDateTime.now().truncatedTo(ChronoUnit.HOURS)
         val formattedTime = DateTimes.format(taskTime, "YYMMddHH")
@@ -211,6 +219,12 @@ class CrawlRule {
         }
         if (waitForTimeoutMillis != null) {
             args += " -waitForTimeoutMillis $waitForTimeoutMillis"
+        }
+        if (proxyServer.isNullOrBlank().not()) {
+            args += " -proxyServer $proxyServer"
+        }
+        if (fetchMode.isNullOrBlank().not()) {
+            args += " -fetchMode $fetchMode"
         }
         return args
     }
