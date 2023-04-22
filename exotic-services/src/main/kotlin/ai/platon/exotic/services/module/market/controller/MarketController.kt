@@ -1,9 +1,6 @@
 package ai.platon.exotic.services.module.market.controller
 
 import ai.platon.exotic.driver.crawl.ExoticCrawler
-import ai.platon.exotic.driver.crawl.entity.CrawlRule
-import ai.platon.exotic.driver.crawl.entity.PortalTask
-import ai.platon.exotic.driver.crawl.entity.ResultItem
 import ai.platon.exotic.driver.crawl.scraper.*
 import ai.platon.exotic.services.api.component.CrawlTaskRunner
 import ai.platon.exotic.services.api.controller.response.OhJsonRespBody
@@ -15,7 +12,6 @@ import ai.platon.exotic.services.module.market.persist.DerivateExchangeRepositor
 import ai.platon.exotic.services.module.market.persist.DerivateRepository
 import ai.platon.exotic.services.module.market.persist.SpotExchangeRepository
 import ai.platon.exotic.services.module.market.persist.SpotRepository
-import ai.platon.exotic.services.api.persist.CrawlRuleRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.core.env.Environment
 import org.springframework.data.domain.Page

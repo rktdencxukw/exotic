@@ -2,13 +2,13 @@ package ai.platon.exotic.standalone
 
 import ai.platon.exotic.standalone.starter.ExoticExecutor
 import ai.platon.pulsar.common.urls.UrlUtils
-import ai.platon.scent.context.ScentContexts
+//import ai.platon.scent.context.ScentContexts
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 
 class ExoticExecutorTests {
 
-    val session = ScentContexts.createSession()
+//    val session = ScentContexts.createSession()
 
     @Test
     fun testParseHarvestCmdLine() {
@@ -31,8 +31,9 @@ class ExoticExecutorTests {
         assertTrue(executor.harvest)
         val (_, args1) = UrlUtils.splitUrlArgs(executor.configuredUrl)
         assertEquals(args, args1)
-        val options = session.options(args1)
-        assertTrue(options.componentSelectors.contains("#centerCol"))
+        TODO()
+//        val options = session.options(args1)
+//        assertTrue(options.componentSelectors.contains("#centerCol"))
     }
 
     @Test

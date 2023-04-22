@@ -1,7 +1,7 @@
 package ai.platon.exotic.standalone.api
 
 import ai.platon.exotic.driver.common.ExoticUtils
-import ai.platon.scent.boot.autoconfigure.ScentContextInitializer
+//import ai.platon.scent.boot.autoconfigure.ScentContextInitializer
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.autoconfigure.domain.EntityScan
 import org.springframework.boot.autoconfigure.mongo.embedded.EmbeddedMongoAutoConfiguration
@@ -17,8 +17,8 @@ import java.util.*
 
 @SpringBootApplication(
     scanBasePackages = [
-        "ai.platon.scent.boot.autoconfigure",
-        "ai.platon.scent.rest.api",
+//        "ai.platon.scent.boot.autoconfigure",
+//        "ai.platon.scent.rest.api",
         "ai.platon.exotic.services.api",
         "ai.platon.exotic.services.module",
         "ai.platon.pulsar.driver.report",
@@ -28,7 +28,7 @@ import java.util.*
     exclude = [EmbeddedMongoAutoConfiguration::class]
 )
 @ComponentScan(
-    "ai.platon.scent.rest.api",
+//    "ai.platon.scent.rest.api",
     "ai.platon.exotic.services.api",
     "ai.platon.exotic.standalone.api",
     "ai.platon.pulsar.driver.report", // 扫描 driver中http report controller
@@ -42,9 +42,9 @@ import java.util.*
     "ai.platon.exotic.services.module.market.entity",
     "ai.platon.exotic.services.module.trade.entity"
 )
-@ImportResource("classpath:config/app/app-beans/app-context.xml")
+//@ImportResource("classpath:config/app/app-beans/app-context.xml")
 @EnableJpaRepositories(basePackages = ["ai.platon.exotic.services.api.persist", "ai.platon.exotic.services.module.market.persist", "ai.platon.exotic.services.module.trade.persist"])
-@EnableMongoRepositories("ai.platon.scent.boot.autoconfigure.persist")
+//@EnableMongoRepositories("ai.platon.scent.boot.autoconfigure.persist")
 // failed to import Applications
 //@Import(ExoticApplication::class, ExoticServerApplication::class)
 @EnableScheduling
@@ -59,7 +59,7 @@ fun main(argv: Array<String>) {
 //    System.setProperty("scrape.submitter.dry.run", "true")
     SpringApplicationBuilder(StandaloneApplication::class.java)
         .profiles("h2")
-        .initializers(ScentContextInitializer())
+//        .initializers(ScentContextInitializer())
         .registerShutdownHook(true)
         .run(*argv)
 }

@@ -2,7 +2,7 @@ package ai.platon.exotic
 
 import ai.platon.pulsar.common.config.ImmutableConfig
 import ai.platon.pulsar.protocol.browser.emulator.BrowserResponseHandler
-import ai.platon.scent.boot.autoconfigure.ScentContextInitializer
+//import ai.platon.scent.boot.autoconfigure.ScentContextInitializer
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.autoconfigure.domain.EntityScan
@@ -13,16 +13,16 @@ import org.springframework.data.mongodb.repository.config.EnableMongoRepositorie
 
 @SpringBootApplication(
     scanBasePackages = [
-        "ai.platon.scent.boot.autoconfigure",
-        "ai.platon.scent.rest.api",
+//        "ai.platon.scent.boot.autoconfigure",
+//        "ai.platon.scent.rest.api",
     ]
 )
 @EntityScan(
     "ai.platon.exotic.driver.crawl.entity",
     "ai.platon.exotic.services.entity"
 )
-@ImportResource("classpath:config/app/app-beans/app-context.xml")
-@EnableMongoRepositories("ai.platon.scent.boot.autoconfigure.persist")
+//@ImportResource("classpath:config/app/app-beans/app-context.xml")
+//@EnableMongoRepositories("ai.platon.scent.boot.autoconfigure.persist")
 class ExoticServerApplication(
     private val browserResponseHandler: BrowserResponseHandler,
     private val immutableConfig: ImmutableConfig
@@ -37,9 +37,9 @@ class ExoticServerApplication(
     }
 }
 
-fun main(args: Array<String>) {
-    SpringApplicationBuilder(ExoticServerApplication::class.java)
-        .initializers(ScentContextInitializer())
-        .registerShutdownHook(true)
-        .run(*args)
-}
+//fun main(args: Array<String>) {
+//    SpringApplicationBuilder(ExoticServerApplication::class.java)
+//        .initializers(ScentContextInitializer())
+//        .registerShutdownHook(true)
+//        .run(*args)
+//}

@@ -6,7 +6,8 @@
 	<parent>
 		<groupId>ai.platon.exotic</groupId>
 		<artifactId>exotic</artifactId>
-		<version>1.11.4-SNAPSHOT</version>
+<!--		<version>1.11.4-SNAPSHOT</version>-->
+		<version>1.11.1001-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>exotic-server</artifactId>
@@ -22,19 +23,24 @@
 		</dependency>
 		<dependency>
 			<groupId>ai.platon.pulsar</groupId>
-			<artifactId>pulsar-ql_kc</artifactId>
+			<artifactId>pulsar-protocol</artifactId>
 			<version>${pulsar.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>ai.platon.scent</groupId>
-			<artifactId>scent-boot</artifactId>
-			<version>${scent.version}</version>
+			<groupId>ai.platon.pulsar</groupId>
+			<artifactId>pulsar-ql_kc</artifactId>
+			<version>${pulsar.version}</version>
 		</dependency>
-		<dependency>
-			<groupId>ai.platon.scent</groupId>
-			<artifactId>scent-rest</artifactId>
-			<version>${scent.version}</version>
-		</dependency>
+<!--		<dependency>-->
+<!--			<groupId>ai.platon.scent</groupId>-->
+<!--			<artifactId>scent-boot</artifactId>-->
+<!--			<version>${scent.version}</version>-->
+<!--		</dependency>-->
+<!--		<dependency>-->
+<!--			<groupId>ai.platon.scent</groupId>-->
+<!--			<artifactId>scent-rest</artifactId>-->
+<!--			<version>${scent.version}</version>-->
+<!--		</dependency>-->
 		<dependency>
 			<groupId>ai.platon.commons</groupId>
 			<artifactId>distributed-lock-mongo</artifactId>

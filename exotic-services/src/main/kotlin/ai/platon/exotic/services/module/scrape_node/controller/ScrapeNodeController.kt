@@ -54,7 +54,7 @@ class ScrapeNodeController(
     @GetMapping("/")
     fun list(
         @RequestParam(defaultValue = "0") pageNumber: Int = 0,
-        @RequestParam(defaultValue = "20") pageSize: Int = 20,
+        @RequestParam(defaultValue = "1000") pageSize: Int = 1000,
     ): ResponseEntity<OhJsonRespBody<List<ScrapeNode>>> {
         val results = scrapeNodeService.getAll()
         return ResponseEntity.ok(OhJsonRespBody(results))

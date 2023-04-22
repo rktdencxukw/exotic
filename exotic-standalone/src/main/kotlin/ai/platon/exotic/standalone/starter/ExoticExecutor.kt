@@ -7,16 +7,16 @@ import ai.platon.pulsar.common.options.LoadOptions
 import ai.platon.pulsar.common.sql.ResultSetFormatter
 import ai.platon.pulsar.common.urls.UrlUtils
 import ai.platon.pulsar.ql.ResultSets
-import ai.platon.scent.boot.autoconfigure.ScentContextInitializer
-import ai.platon.scent.dom.HarvestOptions
-import ai.platon.scent.ql.h2.context.ScentSQLContexts
+//import ai.platon.scent.boot.autoconfigure.ScentContextInitializer
+//import ai.platon.scent.dom.HarvestOptions
+//import ai.platon.scent.ql.h2.context.ScentSQLContexts
 import com.google.gson.GsonBuilder
 import org.springframework.boot.builder.SpringApplicationBuilder
 import java.sql.ResultSet
 import kotlin.system.exitProcess
 
 class ExoticExecutor(val argv: Array<String>) {
-    private val session = ScentSQLContexts.createSession()
+//    private val session = ScentSQLContexts.createSession()
 
     /**
      * Do not print anything
@@ -151,46 +151,49 @@ class ExoticExecutor(val argv: Array<String>) {
     }
 
     internal fun scrape(): List<Map<String, String?>> {
-        val (portalUrl, args) = UrlUtils.splitUrlArgs(configuredUrl)
-        if (!UrlUtils.isStandard(portalUrl)) {
-            System.err.println("The portal url is invalid")
-            return listOf()
-        }
+        TODO()
+//        val (portalUrl, args) = UrlUtils.splitUrlArgs(configuredUrl)
+//        if (!UrlUtils.isStandard(portalUrl)) {
+//            System.err.println("The portal url is invalid")
+//            return listOf()
+//        }
 
-        val gson = GsonBuilder().setPrettyPrinting().create()
-        val options = session.options(args)
+//        val gson = GsonBuilder().setPrettyPrinting().create()
+//        val options = session.options(args)
 
-        val hasOutLinkSelector = listOf("outLinkSelector", "outLinkPattern").any { !options.isDefault(it) }
-        val results = if (hasOutLinkSelector) {
-            session.scrapeOutPages(portalUrl, args, scrapeFields)
-        } else {
-            listOf(session.scrape(portalUrl, args, scrapeFields))
-        }
+//        val hasOutLinkSelector = listOf("outLinkSelector", "outLinkPattern").any { !options.isDefault(it) }
+//        val results = if (hasOutLinkSelector) {
+//            session.scrapeOutPages(portalUrl, args, scrapeFields)
+//        } else {
+//            listOf(session.scrape(portalUrl, args, scrapeFields))
+//        }
 
-        if (results.size == 1) {
-            lastOutput = gson.toJson(results[0])
-            output()
-        } else {
-            lastOutput = gson.toJson(results)
-            output()
-        }
+//        if (results.size == 1) {
+//            lastOutput = gson.toJson(results[0])
+//            output()
+//        } else {
+//            lastOutput = gson.toJson(results)
+//            output()
+//        }
 
-        return results
+//        return results
     }
 
     private fun output() {
+        TODO()
         if (!mute) {
             println(lastOutput)
         }
     }
 
     internal fun executeSQL() {
-        val context = ScentSQLContexts.create()
-        val rs = context.executeQuery(sql)
-        lastOutput = ResultSetFormatter(rs, withHeader = true, asList = true).toString()
-        // remove all ` character so that we can paste the sql in a terminal
-        lastOutput = lastOutput?.replace("`", "")
-        output()
+        TODO()
+//        val context = ScentSQLContexts.create()
+//        val rs = context.executeQuery(sql)
+//        lastOutput = ResultSetFormatter(rs, withHeader = true, asList = true).toString()
+//         remove all ` character so that we can paste the sql in a terminal
+//        lastOutput = lastOutput?.replace("`", "")
+//        output()
     }
 
     internal fun runServer() {
@@ -199,10 +202,11 @@ class ExoticExecutor(val argv: Array<String>) {
         } else {
             "dev"
         }
+        println("argv: ${argv.joinToString { it }}")
         SpringApplicationBuilder(StandaloneApplication::class.java)
 //            .profiles("h2")
             .profiles(profile)
-            .initializers(ScentContextInitializer())
+//            .initializers(ScentContextInitializer())
             .registerShutdownHook(true)
             .run(*argv)
     }
@@ -279,7 +283,8 @@ class ExoticExecutor(val argv: Array<String>) {
     }
 
     private fun xsqlHelp(): ResultSet {
-        return ScentSQLContexts.create().executeQuery("CALL XSQL_HELP()")
+        TODO()
+//        return ScentSQLContexts.create().executeQuery("CALL XSQL_HELP()")
     }
 
     private fun formatXSQLHelp(rs: ResultSet): String {
@@ -360,9 +365,10 @@ $option:
     }
 
     private fun harvestOptions(): ResultSet {
-        val rs = ResultSets.newSimpleResultSet("GROUP", "OPTION", "TYPE", "DEFAULT", "DESCRIPTION")
-        HarvestOptions.helpList.forEach { rs.addRow("HARVEST OPTION", *it.toTypedArray()) }
-        return rs
+        TODO()
+//        val rs = ResultSets.newSimpleResultSet("GROUP", "OPTION", "TYPE", "DEFAULT", "DESCRIPTION")
+//        HarvestOptions.helpList.forEach { rs.addRow("HARVEST OPTION", *it.toTypedArray()) }
+//        return rs
     }
 
     companion object {

@@ -6,19 +6,41 @@
 	<parent>
 		<groupId>ai.platon.exotic</groupId>
 		<artifactId>exotic</artifactId>
-		<version>1.11.4-SNAPSHOT</version>
+<!--		<version>1.11.4-SNAPSHOT</version>-->
+		<version>1.11.1001-SNAPSHOT</version>
 	</parent>
 
-	<artifactId>exotic-services-kc</artifactId>
+	<artifactId>exotic-services</artifactId>
 	<packaging>jar</packaging>
 	<name>Exotic Services</name>
 	<description>The exotic web service</description>
+
+	<repositories>
+		<repository>
+			<id>local-ubuntu</id>
+			<url>file:///home/kc/.m2/repository</url>
+		</repository>
+	</repositories>
+
+<!--	<build>-->
+<!--		<plugins>-->
+<!--			<plugin>-->
+<!--				<groupId>org.jetbrains.kotlin</groupId>-->
+<!--				<artifactId>kotlin-maven-plugin</artifactId>-->
+<!--			</plugin>-->
+<!--			<plugin>-->
+<!--				<artifactId>maven-compiler-plugin</artifactId>-->
+<!--			</plugin>-->
+<!--		</plugins>-->
+<!--	</build>-->
 
 	<dependencies>
 		<dependency>
 			<groupId>ai.platon.exotic</groupId>
 			<artifactId>exotic-driver</artifactId>
 			<version>${project.parent.version}</version>
+<!--						<version>1.234</version>-->
+
 		</dependency>
 
 		<dependency>

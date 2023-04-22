@@ -11,7 +11,7 @@
 
     <groupId>ai.platon.exotic</groupId>
     <artifactId>exotic</artifactId>
-    <version>1.11.4-SNAPSHOT</version>
+    <version>1.11.1001-SNAPSHOT</version>
 
 
     <packaging>pom</packaging>
@@ -54,25 +54,30 @@
         </repository>
 
         <repository>
-            <id>platon.ai</id>
-            <url>http://static.platonic.fun/repo/</url>
-            <releases>
-                <enabled>true</enabled>
-                <checksumPolicy>ignore</checksumPolicy>
-            </releases>
-            <snapshots>
-<!--                不向这个服务器更新snapshot-->
-<!--                <enabled>true</enabled>-->
-                <enabled>false</enabled>
-                <checksumPolicy>ignore</checksumPolicy>
-            </snapshots>
+            <id>local-ubuntu</id>
+            <url>file:///home/kc/.m2/repository</url>
         </repository>
+
+<!--        <repository>-->
+<!--            <id>platon.ai</id>-->
+<!--            <url>http://static.platonic.fun/repo/</url>-->
+<!--            <releases>-->
+<!--                <enabled>true</enabled>-->
+<!--                <checksumPolicy>ignore</checksumPolicy>-->
+<!--            </releases>-->
+<!--            <snapshots>-->
+<!--&lt;!&ndash;                不向这个服务器更新snapshot&ndash;&gt;-->
+<!--&lt;!&ndash;                <enabled>true</enabled>&ndash;&gt;-->
+<!--                <enabled>false</enabled>-->
+<!--                <checksumPolicy>ignore</checksumPolicy>-->
+<!--            </snapshots>-->
+<!--        </repository>-->
     </repositories>
 
     <modules>
         <module>exotic-driver</module>
+<!--        <module>exotic-server</module>-->
         <module>exotic-services</module>
-        <module>exotic-server</module>
         <module>exotic-standalone</module>
         <!--		<module>exotic-app</module>-->
     </modules>
@@ -215,22 +220,22 @@
                 <artifactId>maven-clean-plugin</artifactId>
                 <version>3.1.0</version>
             </plugin>
-            <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
-                <dependencies>
-                    <!-- spring热部署 -->
-                    <dependency>
-                        <groupId>org.springframework</groupId>
-                        <artifactId>springloaded</artifactId>
-                        <version>1.2.6.RELEASE</version>
-                    </dependency>
-                </dependencies>
-                <configuration>
-<!--                    <mainClass>cn.springboot.Mainspringboot</mainClass>-->
-                    <mainClass>ai.platon.exotic.standalone.starter.ExoticStandaloneStarterKt</mainClass>
-                </configuration>
-            </plugin>
+<!--            <plugin>-->
+<!--                <groupId>org.springframework.boot</groupId>-->
+<!--                <artifactId>spring-boot-maven-plugin</artifactId>-->
+<!--                <dependencies>-->
+<!--                    &lt;!&ndash; spring热部署 &ndash;&gt;-->
+<!--&lt;!&ndash;                    <dependency>&ndash;&gt;-->
+<!--&lt;!&ndash;                        <groupId>org.springframework</groupId>&ndash;&gt;-->
+<!--&lt;!&ndash;                        <artifactId>springloaded</artifactId>&ndash;&gt;-->
+<!--&lt;!&ndash;                        <version>1.2.6.RELEASE</version>&ndash;&gt;-->
+<!--&lt;!&ndash;                    </dependency>&ndash;&gt;-->
+<!--                </dependencies>-->
+<!--                <configuration>-->
+<!--&lt;!&ndash;                    <mainClass>cn.springboot.Mainspringboot</mainClass>&ndash;&gt;-->
+<!--                    <mainClass>ai.platon.exotic.standalone.starter.ExoticStandaloneStarterKt</mainClass>-->
+<!--                </configuration>-->
+<!--            </plugin>-->
         </plugins>
     </build>
 
@@ -248,7 +253,7 @@
             </dependency>
             <dependency>
                 <groupId>ai.platon.exotic</groupId>
-                <artifactId>exotic-services-kc</artifactId>
+                <artifactId>exotic-services</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
@@ -339,7 +344,7 @@
         <pulsar.kotlin.driver.version>1.6.14</pulsar.kotlin.driver.version>
         <!-- <pulsar.version>1.10.6</pulsar.version> -->
         <pulsar.version>1.10.11-SNAPSHOT</pulsar.version>
-        <scent.version>1.10.4</scent.version>
+<!--        <scent.version>1.10.4</scent.version>-->
         <!--<scent.version>1.10.3-SNAPSHOT</scent.version>-->
     </properties>
 </project>
