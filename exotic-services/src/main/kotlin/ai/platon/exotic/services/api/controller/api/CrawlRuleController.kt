@@ -9,6 +9,9 @@ import ai.platon.exotic.services.api.controller.response.OhJsonRespBody
 import ai.platon.exotic.services.api.persist.CrawlRuleRepository
 import ai.platon.pulsar.common.LinkExtractors
 import ai.platon.pulsar.common.ResourceLoader
+import ai.platon.pulsar.driver.scrape_node.services.ScrapeNodeService
+import ai.platon.pulsar.persist.metadata.IpType
+import com.fasterxml.jackson.databind.ObjectMapper
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.core.env.Environment
 import org.springframework.data.domain.Page
@@ -44,8 +47,11 @@ class CrawlRuleController(
     private val exoticCrawler: ExoticCrawler,
     @Autowired
     private val env: Environment,
-
+    private val ohObjectMapper: ObjectMapper,
     ) {
+
+    private val scrapeNodeService = ScrapeNodeService.instance
+
     private val amazonSeeds = LinkExtractors.fromResource("sites/amazon/best-sellers.txt")
     private val amazonItemSQLTemplate = ResourceLoader.readString("sites/amazon/sqls/x-item.sql").trim()
     private val sqlTemplate = """
@@ -195,7 +201,8 @@ from load_and_select('{{url}}', 'body');
                 exoticCrawler.driverSettings,
                 reportServer,
                 mongoTemplate = exoticCrawler.mongoTemplate,
-                simpMessagingTemplate = exoticCrawler.simpMessagingTemplate
+                simpMessagingTemplate = exoticCrawler.simpMessagingTemplate,
+                ohObjectMapper = ohObjectMapper
             )
         taskSubmitter.scrape(listenableScrapeTask)
 
@@ -315,6 +322,9 @@ from load_and_select('{{url}}', 'body');
     @PostMapping("start/{id}")
     fun start(@PathVariable("id") id: Long): ResponseEntity<OhJsonRespBody<String>> {
         val rule = repository.findById(id).orElseThrow { IllegalArgumentException("Invalid rule Id: $id") }
+        if (rule.ipTypeWant == IpType.RESIDENCE.name && scrapeNodeService.getAll().isEmpty()) {
+            return ResponseEntity.badRequest().body(OhJsonRespBody<String>().error("规则${rule.id}的ipTypeWant为RESIDENCE，但是没有可用的节点，请先添加节点"))
+        }
 
 //        rule.status = RuleStatus.Created.toString()
 //        rule.adjustFields()
@@ -353,11 +363,20 @@ from load_and_select('{{url}}', 'body');
     fun startBatch(
         @RequestParam ids: List<Long> = listOf()
     ): ResponseEntity<OhJsonRespBody<String>> {
+        var stringBuilder = StringBuilder()
         for (id in ids) {
             val rule = repository.findById(id).orElseThrow { IllegalArgumentException("Invalid rule Id: $id") }
+            if (rule.ipTypeWant == IpType.RESIDENCE.name && scrapeNodeService.getAll().isEmpty()) {
+                stringBuilder.append("规则${rule.id}的ipTypeWant为RESIDENCE，但是没有可用的节点，请先添加节点")
+                continue
+            }
             crawlTaskRunner.startCrawl(rule)
         }
-
-        return ResponseEntity.ok(OhJsonRespBody.ok())
+        val msg = stringBuilder.toString()
+        return if (msg.isNullOrEmpty()) {
+            ResponseEntity.ok(OhJsonRespBody.ok())
+        } else {
+            ResponseEntity.badRequest().body(OhJsonRespBody<String>().error(msg))
+        }
     }
 }

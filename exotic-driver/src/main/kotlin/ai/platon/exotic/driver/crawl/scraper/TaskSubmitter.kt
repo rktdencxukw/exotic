@@ -8,6 +8,8 @@ import ai.platon.pulsar.driver.DriverSettings
 import ai.platon.pulsar.driver.ScrapeException
 import ai.platon.pulsar.driver.ScrapeResponse
 import ai.platon.pulsar.driver.utils.SQLTemplate
+import ai.platon.pulsar.persist.metadata.IpType
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.google.gson.Gson
 import org.apache.commons.lang3.RandomStringUtils
 import org.slf4j.Logger
@@ -28,10 +30,11 @@ open class TaskSubmitter(
     private val autoCollect: Boolean = true,
     private val mongoTemplate: MongoTemplate,
     private val simpMessagingTemplate: SimpMessagingTemplate,
+    private val ohObjectMapper: ObjectMapper?,
 ) : AutoCloseable {
     var logger: Logger = LoggerFactory.getLogger(TaskSubmitter::class.java)
     private var dryRun = System.getProperty("scrape.submitter.dry.run") == "true"
-    var driver = Driver(driverSettings.scrapeServer, driverSettings.authToken, reportServer, mongoTemplate, simpMessagingTemplate)
+    var driver = Driver(driverSettings.scrapeServer, driverSettings.authToken, reportServer, mongoTemplate, simpMessagingTemplate, ohObjectMapper!!)
 
     private val pendingTasks: MutableMap<String, ListenableScrapeTask> = ConcurrentSkipListMap()
     private val retryingTaskIds: ConcurrentSkipListSet<String> = ConcurrentSkipListSet()
@@ -106,7 +109,8 @@ open class TaskSubmitter(
                 "mock." + RandomStringUtils.randomAlphanumeric(10)
             } else {
 //                driver.submit(sql, task.priority, false)
-                driver.submitWithProcess(sql, listenableTask.task.companionPortalTask!!.rule!!.scrapeServer) {
+                val ipTypeWant = IpType.fromString(listenableTask.task.companionPortalTask!!.rule!!.ipTypeWant)
+                driver.submitWithProcess(sql, listenableTask.task.companionPortalTask!!.rule!!.scrapeServer, ipTypeWant) {
                     listenableTask.task.response = it
 //                    if (it.)
                     // TODO should judge the status code

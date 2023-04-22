@@ -56,7 +56,7 @@ open class OutPageScraper(
     val httpTimeout: Duration = Duration.ofMinutes(3)
     val hc = HttpClient.newHttpClient()
 
-    val taskSubmitter: TaskSubmitter = TaskSubmitter(driverSettings, reportServer, true, mongoTemplate, simpMessagingTemplate)
+    val taskSubmitter: TaskSubmitter = TaskSubmitter(driverSettings, reportServer, true, mongoTemplate, simpMessagingTemplate, ohObjectMapper)
 
     fun scrape(sql: String) {
         val a = """
