@@ -25,7 +25,7 @@ interface CrawlRuleRepository : JpaRepository<CrawlRule, Serializable> {
         value = "select u.tags from CrawlRule u",
         countQuery = "select count(u.tags) from CrawlRule u",
     )
-    fun findAllTags(pageable: Pageable): Page<Array<Object>>
+    fun findAllTags(pageable: Pageable): Page<String>
 }
 
 @Repository

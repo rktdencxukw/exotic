@@ -52,11 +52,15 @@ class ScrapeResultController(
     fun list(
         @RequestParam(defaultValue = "0") pageNumber: Int = 0,
         @RequestParam(defaultValue = "20") pageSize: Int = 20,
+        @RequestParam(defaultValue = "0") portalTaskId: Int = 0
     ): ResponseEntity<OhJsonRespBody<List<ResultItemDto>>> {
         val sort = Sort.Direction.DESC
         val sortProperty = "createdTime"
         val pageable = PageRequest.of(pageNumber, pageSize, sort, sortProperty)
         var query = Query()
+        if (portalTaskId != 0) {
+            query.addCriteria(Criteria.where("portalTaskId").`is`(portalTaskId))
+        }
 //        query.addCriteria(Criteria.where("ruleId").`is`(id))
         query.with(pageable)
         val results = mongoTemplate.find(query, ResultItem::class.java).map { var r = ResultItemDto(it)

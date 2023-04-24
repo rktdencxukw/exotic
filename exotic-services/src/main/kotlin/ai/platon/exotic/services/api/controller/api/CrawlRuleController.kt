@@ -85,7 +85,7 @@ from load_and_select('{{url}}', 'body');
             } else {
                 for (s in rsp.content) {
                     s?.let {
-                        val s2 = (it[0] as? String)?.split(",")?.map { it -> it.trim() }
+                        val s2 = it.split(",")?.map { it -> it.trim() }
                         s2?.let{tagsSet.addAll(s2)}
                     }
                 }

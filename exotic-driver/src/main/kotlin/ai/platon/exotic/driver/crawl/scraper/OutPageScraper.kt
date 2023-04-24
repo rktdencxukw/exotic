@@ -152,7 +152,13 @@ open class OutPageScraper(
                                 // get host from url
                                 var url = URL(task.url);
                                 val host = url.host;
-                                href = "$host/$href"
+                                val sb = StringBuilder(host)
+                                if (href.startsWith("/")) {
+                                    sb.append(href)
+                                } else {
+                                    sb.append("/$href")
+                                }
+                                href = sb.toString()
                             }
                             val resultItem = ResultItem(task.rule!!.id!!, task.id!!, ids[i], titles[i], href, content)
                             mongoTemplate.save(resultItem)
