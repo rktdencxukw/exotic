@@ -9,6 +9,7 @@ import ai.platon.exotic.services.api.entity.generated.IntegratedProduct
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
+import org.springframework.data.jpa.repository.Query
 import org.springframework.stereotype.Repository
 import java.io.Serializable
 import java.time.LocalDateTime
@@ -18,6 +19,13 @@ import java.util.*
 interface CrawlRuleRepository : JpaRepository<CrawlRule, Serializable> {
     fun findAllByStatusIn(status: List<String>, pageable: Pageable): Page<CrawlRule>
     fun findAllByStatusNot(status: String, pageable: Pageable): Page<CrawlRule>
+
+    // if multi fields, maybe need to custom a dto object
+    @Query(
+        value = "select u.tags from CrawlRule u",
+        countQuery = "select count(u.tags) from CrawlRule u",
+    )
+    fun findAllTags(pageable: Pageable): Page<Array<Object>>
 }
 
 @Repository

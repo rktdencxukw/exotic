@@ -114,6 +114,7 @@ class CrawlRule {
 
     var ipTypeWant: String = IpType.SERVER.name
     var fetchModeWant: String = FetchMode.BROWSER.name
+    var tags: String = ""
 
     /**
      * The time difference, in minutes, between UTC time and local time.

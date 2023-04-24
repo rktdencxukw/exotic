@@ -48,7 +48,7 @@ class CrawlRuleController(
     @Autowired
     private val env: Environment,
     private val ohObjectMapper: ObjectMapper,
-    ) {
+) {
 
     private val scrapeNodeService = ScrapeNodeService.instance
 
@@ -69,6 +69,29 @@ from load_and_select('{{url}}', 'body');
         reportServer =
             "http://127.0.0.1:${env.getProperty("server.port")}${env.getProperty("server.servlet.context-path")}"
         println("kcdebug. Web server url: $reportServer")
+    }
+
+    @GetMapping("/tags")
+    fun listTags(): ResponseEntity<OhJsonRespBody<List<String>>> {
+        var tagsSet = HashSet<String>()
+        val sort = Sort.Direction.DESC
+        val sortProperty = "id"
+        var page = 0
+        while (true) {
+            val pageable = PageRequest.of(page++, 100, sort, sortProperty)
+            val rsp = repository.findAllTags(pageable)
+            if (rsp.isEmpty) {
+                break
+            } else {
+                for (s in rsp.content) {
+                    s?.let {
+                        val s2 = (it[0] as? String)?.split(",")?.map { it -> it.trim() }
+                        s2?.let{tagsSet.addAll(s2)}
+                    }
+                }
+            }
+        }
+        return ResponseEntity.ok(OhJsonRespBody(tagsSet.toList()))
     }
 
 
@@ -323,7 +346,8 @@ from load_and_select('{{url}}', 'body');
     fun start(@PathVariable("id") id: Long): ResponseEntity<OhJsonRespBody<String>> {
         val rule = repository.findById(id).orElseThrow { IllegalArgumentException("Invalid rule Id: $id") }
         if (rule.ipTypeWant == IpType.RESIDENCE.name && scrapeNodeService.getAll().isEmpty()) {
-            return ResponseEntity.badRequest().body(OhJsonRespBody<String>().error("规则${rule.id}的ipTypeWant为RESIDENCE，但是没有可用的节点，请先添加节点"))
+            return ResponseEntity.badRequest()
+                .body(OhJsonRespBody<String>().error("规则${rule.id}的ipTypeWant为RESIDENCE，但是没有可用的节点，请先添加节点"))
         }
 
 //        rule.status = RuleStatus.Created.toString()
