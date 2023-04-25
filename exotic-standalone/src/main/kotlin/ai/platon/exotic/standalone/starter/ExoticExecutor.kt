@@ -33,7 +33,8 @@ class ExoticExecutor(val argv: Array<String>) {
         private set
     var server = false
         private set
-    internal var prd = false
+    var prd = false
+        private set
     var criticalHelp = false
         private set
     var help = false
@@ -80,7 +81,14 @@ class ExoticExecutor(val argv: Array<String>) {
 
         when {
             scrape -> scrape()
-            server -> runServer()
+            server -> {
+                var profile = if (prd) {
+                    "mysql"
+                } else {
+                    "dev"
+                }
+                runServer(profile)
+            }
             sql.isNotBlank() -> executeSQL()
             else -> help()
         }
@@ -196,12 +204,7 @@ class ExoticExecutor(val argv: Array<String>) {
 //        output()
     }
 
-    internal fun runServer() {
-        var profile = if (this.prd) {
-            "mysql"
-        } else {
-            "dev"
-        }
+    internal fun runServer(profile: String) {
         println("argv: ${argv.joinToString { it }}")
         SpringApplicationBuilder(StandaloneApplication::class.java)
 //            .profiles("h2")
@@ -221,6 +224,12 @@ class ExoticExecutor(val argv: Array<String>) {
         while (i < argv.size) {
             val arg = argv[i]
             val isLastArg = i == argv.size - 1
+
+            if (arg == "prd") {
+                prd = true
+                ++i
+                continue
+            }
 
             if (arg == "arrange") {
                 if (isLastArg) {

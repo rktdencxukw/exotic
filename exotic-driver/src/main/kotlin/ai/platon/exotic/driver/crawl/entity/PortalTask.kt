@@ -29,6 +29,7 @@ class PortalTask(
 
     var priority: Int = 0,
 ) {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)

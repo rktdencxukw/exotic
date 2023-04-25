@@ -14,6 +14,8 @@ import ai.platon.pulsar.common.DateTimes
 import ai.platon.pulsar.common.collect.queue.ConcurrentNEntrantQueue
 import ai.platon.pulsar.common.stringify
 import ai.platon.pulsar.common.urls.UrlUtils
+import ai.platon.pulsar.driver.scrape_node.services.ScrapeNodeService
+import ai.platon.pulsar.persist.metadata.IpType
 import com.cronutils.model.Cron
 import com.cronutils.model.CronType
 import com.cronutils.model.definition.CronDefinitionBuilder
@@ -41,6 +43,8 @@ class CrawlTaskRunner(
     private val retryingItemTasks = ConcurrentNEntrantQueue<ScrapeTask>(3)
 
     private val processingRules = ConcurrentHashMap<Long, Boolean>();
+
+    private val scrapeNodeService = ScrapeNodeService.instance
 
     @Synchronized
     fun loadUnfinishedTasks() {
@@ -88,6 +92,12 @@ class CrawlTaskRunner(
     @Synchronized
     fun startCrawl(rule: CrawlRule) {
         try {
+            if (rule.ipTypeWant == IpType.RESIDENCE.name && scrapeNodeService.getNodesByIpType(IpType.RESIDENCE)
+                    .isEmpty()
+            ) {
+                logger.warn("no RESIDENCE scrape node ready")
+                return
+            }
             val now = Instant.now()
 
             rule.status = RuleStatus.Running.toString()
@@ -157,7 +167,15 @@ class CrawlTaskRunner(
         portalTaskRepository.saveAll(portalTasks)
 
         portalTasks.shuffled()
-            .asSequence()
+            .asSequence().filter {
+                if (it.rule!!.ipTypeWant == IpType.RESIDENCE.name && scrapeNodeService.getNodesByIpType(IpType.RESIDENCE)
+                        .isEmpty()
+                ) {
+                    logger.warn("no RESIDENCE scrape node ready")
+                    false
+                }
+                true
+            }
             .map { createListenablePortalTask(it, true) }
             .forEach { task -> scraper.scrapeOutPages(task) }
     }
@@ -165,7 +183,15 @@ class CrawlTaskRunner(
     fun submitRetryingScrapeTasks(limit: Int) {
         var n = limit
         while (n-- > 0) {
-            retryingPortalTasks.poll()?.let { scraper.scrapeOutPages(createListenablePortalTask(it)) }
+            retryingPortalTasks.poll()?.let {
+                if (it.rule!!.ipTypeWant == IpType.RESIDENCE.name && scrapeNodeService.getNodesByIpType(IpType.RESIDENCE)
+                        .isEmpty()
+                ) {
+                    logger.warn("no RESIDENCE scrape node ready")
+                } else {
+                    scraper.scrapeOutPages(createListenablePortalTask(it))
+                }
+            }
             // retryingItemTasks.poll()?.let { scraper.scrape(createListenableScrapeTask(it)) }
         }
     }
@@ -208,9 +234,12 @@ class CrawlTaskRunner(
                     if (ids.isNullOrEmpty()) {
                         logger.warn("No ids in task #{} | {}", portalTask.id, it.configuredUrl)
                     } else {
-                        // TODO: normalization
+                        val idsStr = ids.joinToString(",")
+                        if (idsStr.length >= 1024) {
+                            logger.error("ids too long, will not saved. {}, {}", it.url, idsStr)
+                        }
                         val rule = portalTask.rule
-                        rule!!.idsOfLast = ids.joinToString(",")
+                        rule!!.idsOfLast = idsStr
                         crawlRuleRepository.save(rule)
                         crawlRuleRepository.flush()
                     }
@@ -295,7 +324,7 @@ class CrawlTaskRunner(
         val executionTime = ExecutionTime.forCron(quartzCron)
 
         val zonedLastCrawlTime = lastCrawlTime.atZone(DateTimes.zoneId)
-        val nextExecution = executionTime.nextExecution(zonedLastCrawlTime) 
+        val nextExecution = executionTime.nextExecution(zonedLastCrawlTime)
         // val timeToNextExecution = executionTime.timeToNextExecution(zonedLastCrawlTime) 
         // val timeToNextExecution = executionTime.timeToNextExecution(ZonedDateTime.now())
         // logger.warn("kcdebug. timeToNextExecution 0: {}, {}, {}, {}, {}, zonedLastCrawlTime:{}", timeToNextExecution.get().toSeconds(), rule.cronExpression, executionTime.toString(), DateTimes.zoneId, lastCrawlTime, zonedLastCrawlTime.toString())
