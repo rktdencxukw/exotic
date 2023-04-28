@@ -4,3 +4,5 @@ exit 0
 if [[ $? != 0 ]]; then
 	say 'failed'
 fi
+
+#t
